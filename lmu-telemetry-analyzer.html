@@ -127,7 +127,7 @@
     <div id="weatherCard" class="card" style="padding:11px 12px"></div>
     <div id="miniMapCard" class="card" style="padding:11px 12px;display:none">
       <div class="sec-title" data-i18n="miniMapTitle" style="margin-bottom:6px">Wo gewinne / verliere ich?</div>
-      <div class="chartwrap"><canvas id="cMini" height="160"></canvas></div>
+      <div class="chartwrap"><canvas id="cMini" height="160"></canvas><div class="tooltip" id="ttMini"></div></div>
       <div class="legend" style="margin-top:6px;font-size:11px"><span><i style="background:#3fb950"></i> <span data-i18n="legGain">gewinnt</span></span><span><i style="background:#f85149"></i> <span data-i18n="legLose">verliert</span></span></div>
     </div>
     <div id="lapPanel">
@@ -152,7 +152,6 @@
       <div class="tabs">
         <div class="tab active" data-tab="improve" data-i18n="tabImprove">🎯 Wo verliere ich Zeit?</div>
         <div class="tab" data-tab="compare" data-i18n="tabCompare">📈 Vergleich</div>
-        <div class="tab" data-tab="map" data-i18n="tabMap">🗺️ Streckenkarte</div>
         <div class="tab" data-tab="session" data-i18n="tabSession">📋 Letzte Session</div>
         <div class="tab" data-tab="tyres" data-i18n="tabTyres">🛞 Reifen &amp; Bremsen</div>
         <div class="tab" data-tab="setup" data-i18n="tabSetup">🔧 Setup &amp; Pace</div>
@@ -163,6 +162,16 @@
 
       <section data-panel="improve">
         <div id="singleLapNote"></div>
+        <div class="card">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap">
+            <h2 style="margin:0" data-i18n="trackMapTitle">Streckenkarte (interaktiv)</h2>
+            <span style="flex:1"></span>
+            <div class="langsw"><button id="mapModeDelta" class="active" data-i18n="modeDelta">Delta</button><button id="mapModeSpeed" data-i18n="modeSpeed">Tempo</button></div>
+          </div>
+          <div class="chartwrap"><canvas id="cBigMap" height="420"></canvas><div class="tooltip" id="ttBigMap"></div></div>
+          <div class="legend" id="bigMapLegend" style="margin-top:6px"></div>
+          <div class="hint" id="bigMapHint" data-i18n="mapHoverHint" style="margin-top:2px">Mit der Maus über die Strecke fahren für Details an dieser Stelle.</div>
+        </div>
         <div class="card"><h2 data-i18n="lapOverview">Rundenübersicht</h2><div class="grid2" id="kpis"></div></div>
         <div class="card">
           <h2><span data-i18n="deltaTitle">Zeitdelta über die Runde</span> <span class="muted" id="deltaSub"></span></h2>
@@ -183,13 +192,6 @@
           <div class="chartwrap"><canvas id="cPedals" height="190"></canvas><div class="tooltip" id="ttPedals"></div></div></div>
         <div class="card"><h2 data-i18n="steerGear">Lenkung &amp; Gang</h2>
           <div class="chartwrap"><canvas id="cSteer" height="170"></canvas><div class="tooltip" id="ttSteer"></div></div></div>
-      </section>
-
-      <section data-panel="map" style="display:none">
-        <div class="card"><h2 data-i18n="mapTitle">Streckenkarte – nach Geschwindigkeit eingefärbt</h2>
-          <div class="legend"><span><i style="background:#2f81f7"></i> <span data-i18n="slow">langsam</span></span><span><i style="background:#3fb950"></i> <span data-i18n="medium">mittel</span></span><span><i style="background:#f85149"></i> <span data-i18n="fast">schnell</span></span><span><i style="background:#ff00d0;height:8px;width:8px;border-radius:50%"></i> <span data-i18n="lossZone">Zeitverlust-Zone</span></span></div>
-          <div class="chartwrap"><canvas id="cMap" height="520"></canvas><div class="tooltip" id="ttMap"></div></div>
-          <div class="hint" id="mapHint" style="margin-top:6px"></div></div>
       </section>
 
       <section data-panel="session" style="display:none">
@@ -367,7 +369,8 @@ const STR = {
   sectorsTitle:"Sektoren", thTotal:"Gesamt", theoBest:"Theoretische Bestzeit", noSectors:"Keine Sektor-Daten (mind. 1 getimte Runde nötig).",
   weatherTitle:"Wetter & Strecke", wConditions:"Bedingungen", wAir:"Lufttemperatur", wTrack:"Strecke", wWind:"Wind", wWetness:"Nässe", wDry:"trocken", wWet:(p)=>p+" % nass",
   tabSession:"📋 Letzte Session", sessOverview:"Session-Übersicht", thDeltaBest:"Δ Best", thTop:"Top", thFuelLapH:"Sprit L/Rd", thWearLapH:"Verschl. %/Rd", noLapsSession:"Keine Runden in dieser Session.",
-  miniMapTitle:"Wo gewinne / verliere ich?", legGain:"gewinnt", legLose:"verliert", updateAvail:(v)=>"Neue Version v"+v+" verfügbar – klicken zum Download"
+  miniMapTitle:"Wo gewinne / verliere ich?", legGain:"gewinnt", legLose:"verliert", updateAvail:(v)=>"Neue Version v"+v+" verfügbar – klicken zum Download",
+  trackMapTitle:"Streckenkarte (interaktiv)", modeDelta:"Delta", modeSpeed:"Tempo", mapHoverHint:"Mit der Maus über die Strecke fahren für Details an dieser Stelle.", distanceL:"Distanz", gasL:"Gas", brakeL:"Bremse", refShort:"Ref", cmpShort:"Vgl"
  },
  en:{
   reload:"↻ Refresh", session:"Session", refSource:"Reference source", refLap:"Reference lap (best)", cmpLap:"Comparison lap",
@@ -445,7 +448,8 @@ const STR = {
   sectorsTitle:"Sectors", thTotal:"Total", theoBest:"Theoretical best", noSectors:"No sector data (at least 1 timed lap needed).",
   weatherTitle:"Weather & track", wConditions:"Conditions", wAir:"Air temp", wTrack:"Track temp", wWind:"Wind", wWetness:"Wetness", wDry:"dry", wWet:(p)=>p+" % wet",
   tabSession:"📋 Last session", sessOverview:"Session overview", thDeltaBest:"Δ best", thTop:"Top", thFuelLapH:"Fuel L/lap", thWearLapH:"Wear %/lap", noLapsSession:"No laps in this session.",
-  miniMapTitle:"Where do I gain / lose?", legGain:"gain", legLose:"lose", updateAvail:(v)=>"New version v"+v+" available – click to download"
+  miniMapTitle:"Where do I gain / lose?", legGain:"gain", legLose:"lose", updateAvail:(v)=>"New version v"+v+" available – click to download",
+  trackMapTitle:"Track map (interactive)", modeDelta:"Delta", modeSpeed:"Speed", mapHoverHint:"Hover over the track for details at that point.", distanceL:"Distance", gasL:"Throttle", brakeL:"Brake", refShort:"Ref", cmpShort:"Cmp"
  }
 };
 function t(k,...a){ let v=(STR[LANG]&&STR[LANG][k]); if(v==null)v=STR.de[k]; if(v==null)return k; return typeof v==="function"?v(...a):v; }
@@ -651,8 +655,8 @@ const CHARTS=[];
 function registerChart(cvId,ttId,renderFn,readFn){
   const cv=document.getElementById(cvId),tt=document.getElementById(ttId); const obj={cv,tt,renderFn,readFn}; CHARTS.push(obj);
   cv.addEventListener("mousemove",e=>{ const g=cv._geom; if(!g)return; const r=cv.getBoundingClientRect();
-    GHOST.x=Math.max(0,Math.min(g.xmax,(e.clientX-r.left-g.x0)/(g.x1-g.x0)*g.xmax)); redrawAll(); showTip(obj,e); });
-  cv.addEventListener("mouseleave",()=>{ GHOST.x=null; redrawAll(); CHARTS.forEach(c=>c.tt.style.display="none"); });
+    GHOST.x=Math.max(0,Math.min(g.xmax,(e.clientX-r.left-g.x0)/(g.x1-g.x0)*g.xmax)); syncCursor(); showTip(obj,e); });
+  cv.addEventListener("mouseleave",()=>{ GHOST.x=null; syncCursor(); CHARTS.forEach(c=>c.tt.style.display="none"); });
   return obj;
 }
 function showTip(obj,e){ if(!obj.readFn||GHOST.x==null){obj.tt.style.display="none";return;} const rows=obj.readFn(GHOST.x); if(!rows){obj.tt.style.display="none";return;}
@@ -672,7 +676,7 @@ function recompute(){
   if(!refP||!STATE.cmpP){ setStatus(t("lapIncomplete")); return; }
   STATE.refP=refP; STATE.refInfo={lapTime:refTime,label:refLabel,saved:!!saved};
   STATE.ana=analyze(refP,STATE.cmpP);
-  buildLapTable(); renderKPIs(); renderInsights(); renderSectors(); renderSession(); buildCharts(); fillChanSelect(); renderMap(); renderMiniMap(); renderTyres(); redrawAll();
+  buildLapTable(); renderKPIs(); renderInsights(); renderSectors(); renderSession(); buildCharts(); fillChanSelect(); renderBigMap(); renderMiniMap(); renderTyres(); redrawAll();
   const single = !saved && STATE.refLap===STATE.cmpLap;
   document.getElementById("singleLapNote").innerHTML = single ? `<div class="banner">${t("singleLap")}</div>` : "";
   renderPit();
@@ -742,28 +746,63 @@ function projectTrack(p,w,h,pad){
 }
 function drawTrackMap(cv, p, segColor, o){
   o=o||{}; const {ctx,w,h}=fitCanvas(cv); ctx.clearRect(0,0,w,h);
-  if(!p||!p.lat||!p.lon){ if(o.noGpsText){ctx.fillStyle="#6b7686";ctx.font="13px Segoe UI";ctx.fillText(o.noGpsText,16,26);} cv._geom=null; return false; }
+  if(!p||!p.lat||!p.lon){ if(o.noGpsText){ctx.fillStyle="#6b7686";ctx.font="13px Segoe UI";ctx.fillText(o.noGpsText,16,26);} cv._track=null; return false; }
   const g=projectTrack(p,w,h,o.pad||30), N=g.N;
   ctx.lineWidth=o.lw||4; ctx.lineCap="round";
   for(let i=1;i<N;i++){ ctx.strokeStyle=segColor(i); ctx.beginPath();ctx.moveTo(g.PX(i-1),g.PY(i-1));ctx.lineTo(g.PX(i),g.PY(i));ctx.stroke(); }
   if(o.zones) o.zones.forEach(z=>{ const i=(z.a+z.b)>>1; ctx.fillStyle="#ff00d0";ctx.beginPath();ctx.arc(g.PX(i),g.PY(i),o.dot||6,0,7);ctx.fill();
     if(o.zoneText){ctx.fillStyle="#fff";ctx.font="bold 11px Segoe UI";ctx.fillText("+"+z.loss.toFixed(2)+"s",g.PX(i)+9,g.PY(i)+4);} });
-  ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(g.PX(0),g.PY(0),o.dot?4:5,0,7);ctx.fill(); cv._geom=null; return true;
+  ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(g.PX(0),g.PY(0),o.dot?4:5,0,7);ctx.fill();
+  // Hover-Marker an aktueller Cursor-Distanz
+  if(o.markerX!=null && o.L){ const idx=Math.max(0,Math.min(N-1,Math.round(o.markerX/o.L*(N-1))));
+    ctx.beginPath();ctx.arc(g.PX(idx),g.PY(idx),o.lw>4?7:5,0,7); ctx.fillStyle="#fff"; ctx.fill(); ctx.lineWidth=2; ctx.strokeStyle="#000"; ctx.stroke(); }
+  cv._track={N, PX:g.PX, PY:g.PY, L:o.L||0};
+  return true;
 }
-function renderMap(){
-  const p=STATE.refP, hint=document.getElementById("mapHint");
-  let vmn=Infinity,vmx=-Infinity; if(p&&p.speed){for(let i=0;i<p.speed.length;i++){const v=p.speed[i];if(v<vmn)vmn=v;if(v>vmx)vmx=v;}}
-  const ok=drawTrackMap(document.getElementById("cMap"), p, i=>speedColor((p.speed[i]-vmn)/((vmx-vmn)||1)),
-    {zones:STATE.ana?STATE.ana.zones.slice(0,6):null, zoneText:true, noGpsText:t("noGpsShort")});
-  hint.textContent = ok? t("mapLegend") : t("noGps");
+let mapMode="delta";
+function gainLossColorAt(p,a,i){ if(!a||i<1)return "#46506a"; const s=a.delta[i]-a.delta[i-1]; return s>0.0006?"#f85149":(s<-0.0006?"#3fb950":"#46506a"); }
+function renderBigMap(){
+  const p=STATE.refP,a=STATE.ana, cv=document.getElementById("cBigMap"), leg=document.getElementById("bigMapLegend");
+  if(!cv) return;
+  if(!p||!p.lat||!p.lon){ drawTrackMap(cv,p,()=>"#46506a",{noGpsText:t("noGpsShort")}); leg.innerHTML=""; document.getElementById("bigMapHint").textContent=t("noGps"); return; }
+  document.getElementById("bigMapHint").textContent=t("mapHoverHint");
+  let colorFn;
+  if(mapMode==="speed"){ let mn=Infinity,mx=-Infinity; for(let i=0;i<p.speed.length;i++){const v=p.speed[i];if(v<mn)mn=v;if(v>mx)mx=v;}
+    colorFn=i=>speedColor((p.speed[i]-mn)/((mx-mn)||1));
+    leg.innerHTML=`<span><i style="background:#2f81f7"></i> ${t("slow")}</span><span><i style="background:#3fb950"></i> ${t("medium")}</span><span><i style="background:#f85149"></i> ${t("fast")}</span>`;
+  } else { colorFn=i=>gainLossColorAt(p,a,i);
+    leg.innerHTML=`<span><i style="background:#3fb950"></i> ${t("legGain")}</span><span><i style="background:#f85149"></i> ${t("legLose")}</span><span><i style="background:#ff00d0;height:8px;width:8px;border-radius:50%"></i> ${t("lossZone")}</span>`;
+  }
+  drawTrackMap(cv, p, colorFn, {zones:a?a.zones.slice(0,6):null, zoneText:true, lw:5, markerX:GHOST.x, L:p.L});
 }
 function renderMiniMap(){
   const card=document.getElementById("miniMapCard"), p=STATE.refP, a=STATE.ana;
   if(!p||!p.lat||!p.lon||!a){ if(card)card.style.display="none"; return; }
   card.style.display="";
-  const d=a.delta;
-  drawTrackMap(document.getElementById("cMini"), p, i=>{ const s=d[i]-d[i-1]; return s>0.0006?"#f85149":(s<-0.0006?"#3fb950":"#46506a"); },
-    {zones:a.zones.slice(0,4), zoneText:false, lw:3.5, dot:4, pad:14});
+  drawTrackMap(document.getElementById("cMini"), p, i=>gainLossColorAt(p,a,i),
+    {zones:a.zones.slice(0,4), zoneText:false, lw:3.5, dot:4, pad:14, markerX:GHOST.x, L:p.L});
+}
+/* Cursor-Synchronisation Karte <-> Charts */
+function syncCursor(){ redrawAll(); renderBigMap(); renderMiniMap(); }
+function mapTipRows(i){ const rp=STATE.refP,cp=STATE.cmpP,a=STATE.ana; if(!rp)return"";
+  let h=`<div class="row" style="color:#8b97a7"><span>${t("distanceL")}</span><b>${rp.grid[i].toFixed(0)} m</b></div>`;
+  h+=`<div class="row"><span style="color:#2f81f7">${t("speedKmh").replace(/\s*\(.*\)/,"")} ${t("refShort")}</span><b>${rp.speed[i].toFixed(0)} km/h</b></div>`;
+  h+=`<div class="row"><span style="color:#ff7a00">${t("speedKmh").replace(/\s*\(.*\)/,"")} ${t("cmpShort")}</span><b>${cp.speed[i].toFixed(0)} km/h</b></div>`;
+  if(a) h+=`<div class="row"><span>Delta</span><b>${fmtDelta(a.delta[i])} s</b></div>`;
+  if(rp.thr&&cp.thr) h+=`<div class="row"><span style="color:#3fb950">${t("gasL")} ${t("refShort")}/${t("cmpShort")}</span><b>${rp.thr[i].toFixed(0)} / ${cp.thr[i].toFixed(0)} %</b></div>`;
+  if(rp.brk&&cp.brk) h+=`<div class="row"><span style="color:#f85149">${t("brakeL")} ${t("refShort")}/${t("cmpShort")}</span><b>${rp.brk[i].toFixed(0)} / ${cp.brk[i].toFixed(0)} %</b></div>`;
+  return h;
+}
+function attachMapHover(cvId, ttId){
+  const cv=document.getElementById(cvId), tt=document.getElementById(ttId); if(!cv)return;
+  cv.addEventListener("mousemove",e=>{ const tr=cv._track; if(!tr||!STATE.refP){return;}
+    const r=cv.getBoundingClientRect(), mx=e.clientX-r.left, my=e.clientY-r.top;
+    let bi=0,bd=1e9; for(let i=0;i<tr.N;i++){ const dx=tr.PX(i)-mx, dy=tr.PY(i)-my, d=dx*dx+dy*dy; if(d<bd){bd=d;bi=i;} }
+    GHOST.x=STATE.refP.grid[bi]; syncCursor();
+    tt.innerHTML=mapTipRows(bi); tt.style.display="block";
+    let x=mx+14,y=my+12; if(x>r.width-170)x-=185; tt.style.left=x+"px"; tt.style.top=y+"px";
+  });
+  cv.addEventListener("mouseleave",()=>{ GHOST.x=null; syncCursor(); tt.style.display="none"; });
 }
 function speedColor(t){ t=Math.max(0,Math.min(1,t));
   if(t<0.5){const u=t/0.5;return `rgb(${47+16*u|0},${129+56*u|0},${247-167*u|0})`;}
@@ -1204,12 +1243,12 @@ function steeringCorrections(m,lap){ const cs=findChan(m.channels,ALIAS.steer); 
 /* ---------- Tabs ---------- */
 function switchTab(name){ document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.tab===name));
   document.querySelectorAll("section[data-panel]").forEach(s=>s.style.display=s.dataset.panel===name?"":"none");
-  setTimeout(()=>{redrawAll(); if(name==="map")renderMap(); if(name==="pit")renderPit(); if(name==="tyres")renderTyres(); if(name==="setup")renderSetup(); if(name==="session")renderSession();},0); }
+  setTimeout(()=>{redrawAll(); if(name==="improve")renderBigMap(); if(name==="pit")renderPit(); if(name==="tyres")renderTyres(); if(name==="setup")renderSetup(); if(name==="session")renderSession();},0); }
 document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>switchTab(t.dataset.tab));
-addEventListener("resize",()=>{redrawAll(); if(STATE.refP){renderMap();renderMiniMap();}});
+addEventListener("resize",()=>{redrawAll(); if(STATE.refP){renderBigMap();renderMiniMap();}});
 
 /* ---------- Versionscheck (GitHub Releases) ---------- */
-const APP_VERSION="1.3.0";
+const APP_VERSION="1.4.0";
 let versionChecked=false;
 function cmpVer(a,b){ const pa=String(a).split("."),pb=String(b).split("."); for(let i=0;i<3;i++){ const x=parseInt(pa[i]||0,10),y=parseInt(pb[i]||0,10); if(x>y)return 1; if(x<y)return -1; } return 0; }
 async function checkVersion(){ if(versionChecked)return; versionChecked=true;
@@ -1223,6 +1262,11 @@ async function checkVersion(){ if(versionChecked)return; versionChecked=true;
 /* ---------- Start ---------- */
 document.getElementById("langDe").onclick=()=>setLang("de");
 document.getElementById("langEn").onclick=()=>setLang("en");
+attachMapHover("cBigMap","ttBigMap");
+attachMapHover("cMini","ttMini");
+function updMapMode(){ document.getElementById("mapModeDelta").classList.toggle("active",mapMode==="delta"); document.getElementById("mapModeSpeed").classList.toggle("active",mapMode==="speed"); renderBigMap(); }
+document.getElementById("mapModeDelta").onclick=()=>{ mapMode="delta"; updMapMode(); };
+document.getElementById("mapModeSpeed").onclick=()=>{ mapMode="speed"; updMapMode(); };
 setLang(LANG);
 poll();
 setInterval(poll, POLL_MS);

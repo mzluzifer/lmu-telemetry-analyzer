@@ -12,7 +12,7 @@ einen Boxenstopp-/Energie-Rechner und einen Setup-Vergleich.
 
 - 🎯 **Wo verliere ich Zeit?** – Zeitdelta über die Runde, automatisch erkannte Verlustzonen mit konkreten Tipps (Bremspunkt, Mindestgeschwindigkeit, Gasannahme).
 - 📈 **Vergleich** – Speed / Gas / Bremse / Lenkung / Gang zweier Runden überlagert.
-- 🗺️ **Streckenkarte** – aus GPS, nach Geschwindigkeit eingefärbt, mit Verlustzonen-Markern.
+- 🗺️ **Interaktive Streckenkarte** (groß, oben) – mit der Maus über die Strecke fahren zeigt **Speed, Delta, Gas und Bremse** an dieser Stelle; umschaltbar Delta- (Gewinn/Verlust) oder Tempo-Färbung; synchron mit den Charts.
 - ⏱️ **Sektor-Zeiten** – S1/S2/S3 pro Runde, beste Sektoren hervorgehoben, theoretische Bestzeit.
 - 🌦️ **Wetter & Strecke** – Bedingungen, Luft-/Streckentemperatur, Wind, Nässe.
 - 🧭 **Gewinn/Verlust-Streckenkarte** – immer sichtbare Mini-Karte (Sidebar), grün = Zeit gewonnen, rot = verloren.
