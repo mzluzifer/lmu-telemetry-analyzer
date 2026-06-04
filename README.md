@@ -12,7 +12,8 @@ einen Boxenstopp-/Energie-Rechner und einen Setup-Vergleich.
 
 - 🎯 **Wo verliere ich Zeit?** – Zeitdelta über die Runde, automatisch erkannte Verlustzonen mit konkreten Tipps (Bremspunkt, Mindestgeschwindigkeit, Gasannahme).
 - 📈 **Vergleich** – Speed / Gas / Bremse / Lenkung / Gang zweier Runden überlagert.
-- 🗺️ **Interaktive Streckenkarte** (groß, oben) – mit der Maus über die Strecke fahren zeigt **Speed, Delta, Gas und Bremse** an dieser Stelle; umschaltbar Delta- (Gewinn/Verlust) oder Tempo-Färbung; synchron mit den Charts.
+- 🗺️ **Interaktive Streckenkarte** (groß, oben; auch im Vergleich- und Reifen-Tab) – mit der Maus über die Strecke fahren zeigt **Speed, Delta, Gas und Bremse** an dieser Stelle; umschaltbar Delta- (Gewinn/Verlust) oder Tempo-Färbung; im Reifen-Tab nach **Bremstemperatur** (Ø 4 Bremsen) eingefärbt; synchron mit den Charts.
+- 📂 **Referenz-Lap hochladen** – eigene **MoTeC `.ld`-Datei** als Referenzrunde laden und deine Runden dagegen vergleichen.
 - ⏱️ **Sektor-Zeiten** – S1/S2/S3 pro Runde, beste Sektoren hervorgehoben, theoretische Bestzeit.
 - 🌦️ **Wetter & Strecke** – Bedingungen, Luft-/Streckentemperatur, Wind, Nässe.
 - 🧭 **Gewinn/Verlust-Streckenkarte** – immer sichtbare Mini-Karte (Sidebar), grün = Zeit gewonnen, rot = verloren.

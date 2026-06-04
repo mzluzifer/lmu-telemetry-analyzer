@@ -21,7 +21,7 @@ const BASE = process.pkg ? path.dirname(process.execPath) : __dirname;
 const DUCKDB = path.join(BASE, "duckdbcli", "duckdb.exe");
 const HTML = path.join(__dirname, "lmu-telemetry-analyzer.html"); // im pkg-Snapshot eingebettet
 const REPO = "mzluzifer/lmu-telemetry-analyzer";
-const APP_VERSION = "1.4.0";
+const APP_VERSION = "1.5.0";
 
 // DuckDB-CLI bei Bedarf herunterladen (für die .exe ohne Begleitskript)
 function ensureDuckDB() {
