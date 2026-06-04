@@ -24,6 +24,7 @@ einen Boxenstopp-/Energie-Rechner und einen Setup-Vergleich.
 - ⛽ **Boxenstopp-Rechner** – aus Rennlänge, Reifensätzen, Fahrern und der gemessenen Pace/Verbrauch: Stint-Längen, Ziel-Virtual-Energy pro Runde, schnellste Gesamtzeit-Strategie, Fahrer-Einteilung (berücksichtigt Energie **und** Reifenverschleiß).
 - ⏺ **Live** – lädt nach jedem Stint automatisch die neue Aufnahme; während eine Aufnahme läuft (Datei gesperrt) wird die letzte fertige Session gezeigt.
 - 🌐 **Sprache** – Oberfläche per Klick umschaltbar zwischen **Deutsch und Englisch** (oben rechts).
+- 🪟 **Aufgeräumte Oberfläche** – **einklappbare Sidebar**, **Delta-Grafik** auch im Vergleich-Tab und Links zu **GitHub** und zum **YouTube-Kanal** in der Kopfzeile. Delta-Vergleiche ignorieren Out-/In-Laps konsequent als Referenz.
 
 ## Voraussetzungen
 
@@ -45,13 +46,17 @@ In `…\Le Mans Ultimate\UserData\player\Settings.JSON`:
 
 ## Starten
 
-**Am einfachsten – als `.exe` (kein Node.js nötig):** `LMU-Telemetrie.exe` doppelklicken. Sie startet
-alles und öffnet den Browser automatisch. (DuckDB-CLI wird beim ersten Start geladen, falls nicht
-daneben vorhanden.) Das schwarze Fenster offen lassen, solange du die App benutzt.
+**Am einfachsten – ohne Konsolenfenster:** **`Start LMU Telemetrie.vbs`** doppelklicken. Die App startet
+komplett im Hintergrund (**kein schwarzes Kommandozeilenfenster**) und öffnet den Browser automatisch.
+Beenden über den **⏻-Button** oben rechts in der App. (DuckDB-CLI wird beim ersten Start geladen, falls
+nicht daneben vorhanden.)
 
-**Alternativ über Node:** **`Start LMU Telemetrie.cmd`** doppelklicken. Beim ersten Start beschafft das
-Skript automatisch **Node.js** (falls nötig) und die **DuckDB-CLI**, startet die Bridge und öffnet
-`http://localhost:8777` im Browser.
+**Alternativ – direkt die `.exe`:** `LMU-Telemetrie.exe` doppelklicken. Funktioniert genauso, zeigt dabei
+aber ein Konsolenfenster (offen lassen, solange du die App benutzt).
+
+**Aus dem Quellcode (mit Node.js):** **`Start LMU Telemetrie.cmd`** doppelklicken. Beim ersten Start
+beschafft das Skript automatisch **Node.js** (falls nötig) und die **DuckDB-CLI**, startet die Bridge und
+öffnet `http://localhost:8777` im Browser.
 
 Der Telemetrie-Ordner wird automatisch über die Steam-Bibliotheken gefunden. Abweichender Pfad:
 ```

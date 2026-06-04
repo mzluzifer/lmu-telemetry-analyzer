@@ -32,6 +32,11 @@
   .langsw button.active{background:var(--accent);color:#1a1205;font-weight:700}
   .vbadge{font-size:11px;color:var(--muted);font-family:Consolas,monospace;white-space:nowrap}
   .vbadge.update a{color:var(--accent);font-weight:700;text-decoration:none;border:1px solid var(--accent);border-radius:6px;padding:2px 7px}
+  .iconbtn{background:var(--panel2);color:var(--muted);border:1px solid var(--line);border-radius:7px;padding:6px 10px;font-size:12px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+  .iconbtn:hover{border-color:var(--accent);color:var(--txt)}
+  .iconbtn.yt:hover{border-color:#ff0000;color:#ff4d4d}
+  body.sb-collapsed .layout{grid-template-columns:0 1fr}
+  body.sb-collapsed aside{display:none}
   @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(63,185,80,.55)}70%{box-shadow:0 0 0 7px rgba(63,185,80,0)}100%{box-shadow:0 0 0 0 rgba(63,185,80,0)}}
   .layout{display:grid;grid-template-columns:310px 1fr;height:calc(100% - 53px)}
   aside{background:var(--panel);border-right:1px solid var(--line);overflow:auto;padding:12px}
@@ -108,6 +113,7 @@
 </head>
 <body>
 <header>
+  <button id="sbToggle" class="iconbtn" title="Seitenleiste ein-/ausklappen">☰</button>
   <h1>LMU <span class="dot">●</span> Telemetrie-Analyse</h1>
   <div id="liveToggle" class="live on" title="Automatisch neueste Aufnahme laden (nach jedem Stint)">
     <span class="led"></span><span id="liveLabel">Live</span>
@@ -117,6 +123,9 @@
   <span id="versionBadge" class="vbadge"></span>
   <span class="grow"></span>
   <span id="status" class="status">…</span>
+  <a class="iconbtn" href="https://github.com/mzluzifer/lmu-telemetry-analyzer" target="_blank" rel="noopener" title="GitHub-Repository">⧉ GitHub</a>
+  <a class="iconbtn yt" href="https://www.youtube.com/@Mzluzifer" target="_blank" rel="noopener" title="YouTube @Mzluzifer">▶ YouTube</a>
+  <button id="btnQuit" class="iconbtn" data-i18n="quit" title="App beenden">⏻ Beenden</button>
 </header>
 
 <div class="layout">
@@ -190,6 +199,9 @@
         <div class="card"><h2 data-i18n="trackMapTitle">Streckenkarte (interaktiv)</h2>
           <div class="chartwrap"><canvas id="cCompMap" height="300"></canvas><div class="tooltip" id="ttCompMap"></div></div>
           <div class="legend" id="compMapLegend" style="margin-top:6px"></div></div>
+        <div class="card"><h2><span data-i18n="deltaCompareTitle">Zeitdelta (Vergleich vs. Referenz)</span> <span class="muted" id="deltaSub2"></span></h2>
+          <div class="legend"><span><i style="background:var(--ref)"></i> <span data-i18n="legRefZero">Referenz (0-Linie)</span></span><span><i style="background:var(--cmp)"></i> <span data-i18n="legCmpSlower">Vergleich · über 0 = langsamer</span></span></div>
+          <div class="chartwrap"><canvas id="cDelta2" height="190"></canvas><div class="tooltip" id="ttDelta2"></div></div></div>
         <div class="card"><h2 data-i18n="speedKmh">Geschwindigkeit (km/h)</h2>
           <div class="legend"><span><i style="background:var(--ref)"></i> <span data-i18n="reference">Referenz</span></span><span><i style="background:var(--cmp)"></i> <span data-i18n="comparison">Vergleich</span></span></div>
           <div class="chartwrap"><canvas id="cSpeed" height="210"></canvas><div class="tooltip" id="ttSpeed"></div></div></div>
@@ -381,7 +393,8 @@ const STR = {
   miniMapTitle:"Wo gewinne / verliere ich?", legGain:"gewinnt", legLose:"verliert", updateAvail:(v)=>"Neue Version v"+v+" verfügbar – klicken zum Download",
   trackMapTitle:"Streckenkarte (interaktiv)", modeDelta:"Delta", modeSpeed:"Tempo", mapHoverHint:"Mit der Maus über die Strecke fahren für Details an dieser Stelle.", distanceL:"Distanz", gasL:"Gas", brakeL:"Bremse", refShort:"Ref", cmpShort:"Vgl",
   tyreMapTitle:"Streckenkarte – Bremstemperatur (Ø 4 Bremsen)", cold:"kalt", warm:"warm", hot:"heiß", brakeTempShort:"Bremstemp.",
-  uploadRef:"📂 Referenz-Lap laden (.ld)", refUploaded:(n,tm)=>"📂 "+n+" · "+tm, ldParsing:"Lese .ld-Datei …", ldError:"Konnte die .ld-Datei nicht lesen (kein gültiges MoTeC-Format oder keine GPS/Lap-Daten).", ldLoaded:(tm,track)=>"Referenz geladen: "+tm+" ("+track+")", ldTrackMismatch:"Achtung: Strecke/Länge weicht von der Session ab – Vergleich evtl. ungenau.", refSrcUploaded:"📂 Hochgeladene Referenz"
+  uploadRef:"📂 Referenz-Lap laden (.ld)", refUploaded:(n,tm)=>"📂 "+n+" · "+tm, ldParsing:"Lese .ld-Datei …", ldError:"Konnte die .ld-Datei nicht lesen (kein gültiges MoTeC-Format oder keine GPS/Lap-Daten).", ldLoaded:(tm,track)=>"Referenz geladen: "+tm+" ("+track+")", ldTrackMismatch:"Achtung: Strecke/Länge weicht von der Session ab – Vergleich evtl. ungenau.", refSrcUploaded:"📂 Hochgeladene Referenz",
+  quit:"⏻ Beenden", quitDone:"App beendet – du kannst diesen Tab schließen.", deltaCompareTitle:"Zeitdelta (Vergleich vs. Referenz)"
  },
  en:{
   reload:"↻ Refresh", session:"Session", refSource:"Reference source", refLap:"Reference lap (best)", cmpLap:"Comparison lap",
@@ -462,7 +475,8 @@ const STR = {
   miniMapTitle:"Where do I gain / lose?", legGain:"gain", legLose:"lose", updateAvail:(v)=>"New version v"+v+" available – click to download",
   trackMapTitle:"Track map (interactive)", modeDelta:"Delta", modeSpeed:"Speed", mapHoverHint:"Hover over the track for details at that point.", distanceL:"Distance", gasL:"Throttle", brakeL:"Brake", refShort:"Ref", cmpShort:"Cmp",
   tyreMapTitle:"Track map – brake temperature (avg of 4 brakes)", cold:"cold", warm:"warm", hot:"hot", brakeTempShort:"Brake temp",
-  uploadRef:"📂 Load reference lap (.ld)", refUploaded:(n,tm)=>"📂 "+n+" · "+tm, ldParsing:"Reading .ld file …", ldError:"Could not read the .ld file (not a valid MoTeC format or no GPS/lap data).", ldLoaded:(tm,track)=>"Reference loaded: "+tm+" ("+track+")", ldTrackMismatch:"Note: track/length differs from the session – comparison may be inaccurate.", refSrcUploaded:"📂 Uploaded reference"
+  uploadRef:"📂 Load reference lap (.ld)", refUploaded:(n,tm)=>"📂 "+n+" · "+tm, ldParsing:"Reading .ld file …", ldError:"Could not read the .ld file (not a valid MoTeC format or no GPS/lap data).", ldLoaded:(tm,track)=>"Reference loaded: "+tm+" ("+track+")", ldTrackMismatch:"Note: track/length differs from the session – comparison may be inaccurate.", refSrcUploaded:"📂 Uploaded reference",
+  quit:"⏻ Quit", quitDone:"App stopped – you can close this tab.", deltaCompareTitle:"Time delta (comparison vs reference)"
  }
 };
 function t(k,...a){ let v=(STR[LANG]&&STR[LANG][k]); if(v==null)v=STR.de[k]; if(v==null)return k; return typeof v==="function"?v(...a):v; }
@@ -718,12 +732,15 @@ function renderKPIs(){
 function renderInsights(){
   const a=STATE.ana, el=document.getElementById("insights");
   document.getElementById("deltaSub").textContent=t("deltaSum",fmtDelta(a.totalLoss));
+  { const d2=document.getElementById("deltaSub2"); if(d2) d2.textContent=t("deltaSum",fmtDelta(a.totalLoss)); }
   if(!a.zones.length){ el.innerHTML=`<div class="hint">${t("noZones")}</div>`; return; }
   el.innerHTML=a.zones.slice(0,6).map((z,i)=>`<div class="insight"><div class="badge">+${z.loss.toFixed(2)}s</div><div class="body"><b>${t("zoneLbl",i+1,z.dStart.toFixed(0),z.dEnd.toFixed(0))}</b>${z.speedDiff<-1?`<span class="pill cmp">${z.cmpMinSpeed.toFixed(0)} vs ${z.refMinSpeed.toFixed(0)} km/h</span>`:''}<div class="sub">${z.tips.join("<br>")}</div></div></div>`).join("");
 }
 function buildCharts(){
   CHARTS.length=0; const refP=STATE.refP,cmpP=STATE.cmpP,a=STATE.ana,L=refP.L;
   registerChart("cDelta","ttDelta",()=>plot(document.getElementById("cDelta"),{xmax:L,yfmt:v=>v.toFixed(2)+"s",series:[{ys:a.delta,color:"#ff7a00",width:2,fill:"rgba(255,122,0,.12)"}],zones:a.zones.slice(0,6)}),
+    x=>{const i=gIdx(x);return[{l:"Delta",v:fmtDelta(a.delta[i])+" s",c:"#ff7a00"}];});
+  if(document.getElementById("cDelta2")) registerChart("cDelta2","ttDelta2",()=>plot(document.getElementById("cDelta2"),{xmax:L,yfmt:v=>v.toFixed(2)+"s",series:[{ys:a.delta,color:"#ff7a00",width:2,fill:"rgba(255,122,0,.12)"}],zones:a.zones.slice(0,6)}),
     x=>{const i=gIdx(x);return[{l:"Delta",v:fmtDelta(a.delta[i])+" s",c:"#ff7a00"}];});
   registerChart("cSpeed","ttSpeed",()=>plot(document.getElementById("cSpeed"),{xmax:L,yfmt:v=>v.toFixed(0),series:[{ys:refP.speed,color:"#2f81f7",width:1.8},{ys:cmpP.speed,color:"#ff7a00",width:1.8}],zones:a.zones.slice(0,6)}),
     x=>{const i=gIdx(x);return[{l:"Speed Ref",v:refP.speed[i].toFixed(0)+" km/h",c:"#2f81f7"},{l:"Speed Vgl",v:cmpP.speed[i].toFixed(0)+" km/h",c:"#ff7a00"},{l:"Δ",v:(cmpP.speed[i]-refP.speed[i]).toFixed(0)+" km/h"}];});
@@ -981,7 +998,8 @@ function computeConsumption(m){
     if(wearWh){const a=wheelVal(wearWh,l.t0),b=wheelVal(wearWh,l.t1); if(a&&b){let w=0;for(let k=0;k<a.length;k++){const d=a[k]-b[k];if(d>w)w=d;} l.wearLap=w;}}
   });
   m.avgLap = lN? lS/lN : (m.laps[0]?m.laps[0].lapTime:0);
-  m.bestLap = complete.length? Math.min.apply(null,complete.map(l=>l.lapTime)) : m.avgLap;
+  const bestPool=complete.filter(l=>!l.outlap&&!l.inlap); const bestSrc=bestPool.length?bestPool:complete;
+  m.bestLap = bestSrc.length? Math.min.apply(null,bestSrc.map(l=>l.lapTime)) : m.avgLap;
   m.vePerLap = veN? veS/veN : null;
   m.fuelPerLap = fN? fS/fN : null;
   m.wearPerLap = wN? wS/wN : null;     // % Verschleiß (schlechtestes Rad) pro Runde
@@ -1036,7 +1054,8 @@ function renderSession(){
   const m=STATE.model, el=document.getElementById("sessionTable"); if(!m||!el)return;
   const laps=m.laps.filter(l=>l.complete);
   if(!laps.length){ el.innerHTML=`<div class="hint">${t("noLapsSession")}</div>`; return; }
-  const best=Math.min.apply(null,laps.map(l=>l.lapTime));
+  const bestPool=laps.filter(l=>!l.outlap&&!l.inlap);
+  const best=Math.min.apply(null,(bestPool.length?bestPool:laps).map(l=>l.lapTime));
   let html=`<table class="pit setuptbl" style="font-size:12.5px"><thead><tr><th>#</th><th>${t("lapTime")}</th><th>${t("thDeltaBest")}</th><th>${t("thTop")}</th><th>${t("thVELap")}</th><th>${t("thFuelLapH")}</th><th>${t("thWearLapH")}</th></tr></thead><tbody>`;
   laps.forEach(l=>{ const d=l.lapTime-best, isBest=l.lapTime===best;
     html+=`<tr${isBest?' class="fastest"':''}><td>${t("lapN",l.index+1)}${l.outlap?' <span class="pill">Out</span>':''}${l.inlap?' <span class="pill">In</span>':''}</td>`
@@ -1355,7 +1374,7 @@ document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>switchTab(t.dataset.t
 addEventListener("resize",()=>{redrawAll(); if(STATE.refP){renderAllMaps();}});
 
 /* ---------- Versionscheck (GitHub Releases) ---------- */
-const APP_VERSION="1.5.0";
+const APP_VERSION="1.6.0";
 let versionChecked=false;
 function cmpVer(a,b){ const pa=String(a).split("."),pb=String(b).split("."); for(let i=0;i<3;i++){ const x=parseInt(pa[i]||0,10),y=parseInt(pb[i]||0,10); if(x>y)return 1; if(x<y)return -1; } return 0; }
 async function checkVersion(){ if(versionChecked)return; versionChecked=true;
@@ -1376,6 +1395,9 @@ attachMapHover("cMini","ttMini");
 function updMapMode(){ document.getElementById("mapModeDelta").classList.toggle("active",mapMode==="delta"); document.getElementById("mapModeSpeed").classList.toggle("active",mapMode==="speed"); renderAllMaps(); }
 document.getElementById("mapModeDelta").onclick=()=>{ mapMode="delta"; updMapMode(); };
 document.getElementById("mapModeSpeed").onclick=()=>{ mapMode="speed"; updMapMode(); };
+if(lsGet("lmuSidebar",0)) document.body.classList.add("sb-collapsed");
+document.getElementById("sbToggle").onclick=()=>{ document.body.classList.toggle("sb-collapsed"); lsSet("lmuSidebar", document.body.classList.contains("sb-collapsed")?1:0); setTimeout(()=>{ if(STATE.refP){redrawAll(); renderAllMaps();} },30); };
+document.getElementById("btnQuit").onclick=async()=>{ try{ await fetch(API+"/api/quit",{method:"POST"}); }catch(e){} document.body.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#8b97a7;font:16px \'Segoe UI\'">'+t("quitDone")+'</div>'; };
 setLang(LANG);
 poll();
 setInterval(poll, POLL_MS);

@@ -21,7 +21,11 @@ const BASE = process.pkg ? path.dirname(process.execPath) : __dirname;
 const DUCKDB = path.join(BASE, "duckdbcli", "duckdb.exe");
 const HTML = path.join(__dirname, "lmu-telemetry-analyzer.html"); // im pkg-Snapshot eingebettet
 const REPO = "mzluzifer/lmu-telemetry-analyzer";
-const APP_VERSION = "1.5.0";
+const APP_VERSION = "1.6.0";
+
+// Konsolenfenster verstecken: Der Start erfolgt über "Start LMU Telemetrie.vbs"
+// (WScript.Shell.Run mit Fensterstil 0 = versteckte Konsole). Die .exe selbst startet
+// den Server direkt; die Flags --hidden / --no-hide werden akzeptiert (No-Op).
 
 // DuckDB-CLI bei Bedarf herunterladen (für die .exe ohne Begleitskript)
 function ensureDuckDB() {
@@ -212,6 +216,12 @@ const server = http.createServer((req, res) => {
     if (u.pathname === "/api/version") {
       return getLatestVersion((latest, url) => json(res, 200, { current: APP_VERSION, latest: latest, url: url, repo: REPO }));
     }
+    if (u.pathname === "/api/quit") {
+      json(res, 200, { ok: true });
+      console.log("Beenden angefordert – Bridge wird gestoppt.");
+      setTimeout(() => process.exit(0), 250);
+      return;
+    }
     if (u.pathname === "/api/sessions") {
       return json(res, 200, listSessions());
     }
@@ -268,7 +278,7 @@ server.listen(PORT, () => {
   console.log("  ▶  Im Browser:  http://localhost:" + PORT);
   console.log("  Telemetrie:     " + (TEL_DIR || "NICHT GEFUNDEN – mit --dir=... angeben"));
   console.log("  DuckDB CLI:     " + (fs.existsSync(DUCKDB) ? "ok" : "FEHLT"));
-  console.log("  (Dieses Fenster offen lassen. Zum Beenden schliessen.)");
+  console.log("  (Beenden: ⏻-Button in der App oder Task-Manager.)");
   console.log("======================================================");
   if (!ARG["no-open"]) setTimeout(openBrowser, 800);
 });
