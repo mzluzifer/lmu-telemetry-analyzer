@@ -7,16 +7,47 @@
    =========================================================================== */
 "use strict";
 const http = require("http");
+const https = require("https");
 const fs = require("fs");
 const path = require("path");
-const { execFileSync } = require("child_process");
+const { execFileSync, exec } = require("child_process");
 
 const ARG = Object.fromEntries(process.argv.slice(2).map(a => {
   const m = a.match(/^--([^=]+)=(.*)$/); return m ? [m[1], m[2]] : [a.replace(/^--/, ""), true];
 }));
 const PORT = parseInt(ARG.port || process.env.LMU_PORT || "8777", 10);
-const DUCKDB = path.join(__dirname, "duckdbcli", "duckdb.exe");
-const HTML = path.join(__dirname, "lmu-telemetry-analyzer.html");
+// Bei .exe (pkg) liegen Daten neben der EXE; im Node-Lauf neben dem Skript.
+const BASE = process.pkg ? path.dirname(process.execPath) : __dirname;
+const DUCKDB = path.join(BASE, "duckdbcli", "duckdb.exe");
+const HTML = path.join(__dirname, "lmu-telemetry-analyzer.html"); // im pkg-Snapshot eingebettet
+const REPO = "mzluzifer/lmu-telemetry-analyzer";
+const APP_VERSION = "1.3.0";
+
+// DuckDB-CLI bei Bedarf herunterladen (für die .exe ohne Begleitskript)
+function ensureDuckDB() {
+  if (fs.existsSync(DUCKDB)) return;
+  console.log("Lade DuckDB-CLI herunter (einmalig)...");
+  const dir = path.join(BASE, "duckdbcli");
+  try {
+    execFileSync("powershell", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command",
+      "$ErrorActionPreference='Stop'; $z=Join-Path $env:TEMP 'lmu_dk.zip'; Invoke-WebRequest 'https://github.com/duckdb/duckdb/releases/download/v1.4.0/duckdb_cli-windows-amd64.zip' -OutFile $z; Expand-Archive $z -DestinationPath '" + dir + "' -Force; Remove-Item $z -Force"],
+      { stdio: "inherit" });
+  } catch (e) { console.error("DuckDB-Download fehlgeschlagen:", e.message); }
+}
+function openBrowser() { try { exec('start "" http://localhost:' + PORT); } catch (e) {} }
+// Neueste Release-Version ermitteln: erst gh (auch bei privatem Repo), sonst öffentliche API
+function getLatestVersion(cb) {
+  for (const g of ["gh", "C:\\Program Files\\GitHub CLI\\gh.exe"]) {
+    try {
+      const out = execFileSync(g, ["api", "repos/" + REPO + "/releases/latest", "--jq", ".tag_name + \"|\" + .html_url"],
+        { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
+      const p = out.trim().split("|"); if (p[0]) return cb(p[0], p[1] || "");
+    } catch (e) {}
+  }
+  https.get({ host: "api.github.com", path: "/repos/" + REPO + "/releases/latest", headers: { "User-Agent": "lmu-telemetry" } },
+    r => { let d = ""; r.on("data", c => d += c); r.on("end", () => { try { const j = JSON.parse(d); cb(j.tag_name || null, j.html_url || ""); } catch (e) { cb(null, ""); } }); })
+    .on("error", () => cb(null, ""));
+}
 
 /* ---- Telemetrie-Ordner finden ---- */
 function findTelemetryDir() {
@@ -176,7 +207,10 @@ const server = http.createServer((req, res) => {
       return res.end(html);
     }
     if (u.pathname === "/api/config") {
-      return json(res, 200, { telDir: TEL_DIR, port: PORT, duckdb: fs.existsSync(DUCKDB) });
+      return json(res, 200, { telDir: TEL_DIR, port: PORT, duckdb: fs.existsSync(DUCKDB), version: APP_VERSION });
+    }
+    if (u.pathname === "/api/version") {
+      return getLatestVersion((latest, url) => json(res, 200, { current: APP_VERSION, latest: latest, url: url, repo: REPO }));
     }
     if (u.pathname === "/api/sessions") {
       return json(res, 200, listSessions());
@@ -227,11 +261,14 @@ function json(res, code, obj) {
   res.end(JSON.stringify(obj));
 }
 
+ensureDuckDB();
 server.listen(PORT, () => {
   console.log("======================================================");
-  console.log("  LMU Telemetrie-Bridge läuft");
-  console.log("  ▶  Im Browser öffnen:  http://localhost:" + PORT);
-  console.log("  Telemetrie-Ordner:    " + (TEL_DIR || "NICHT GEFUNDEN – mit --dir=... angeben"));
-  console.log("  DuckDB CLI:           " + (fs.existsSync(DUCKDB) ? "ok" : "FEHLT (" + DUCKDB + ")"));
+  console.log("  LMU Telemetrie-Analyse v" + APP_VERSION);
+  console.log("  ▶  Im Browser:  http://localhost:" + PORT);
+  console.log("  Telemetrie:     " + (TEL_DIR || "NICHT GEFUNDEN – mit --dir=... angeben"));
+  console.log("  DuckDB CLI:     " + (fs.existsSync(DUCKDB) ? "ok" : "FEHLT"));
+  console.log("  (Dieses Fenster offen lassen. Zum Beenden schliessen.)");
   console.log("======================================================");
+  if (!ARG["no-open"]) setTimeout(openBrowser, 800);
 });

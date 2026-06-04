@@ -63,10 +63,8 @@ if not exist "duckdbcli\duckdb.exe" (
 )
 
 REM ============================================================
-REM  Browser oeffnen + Bridge starten
+REM  Bridge starten (oeffnet den Browser automatisch)
 REM ============================================================
-start "" /b cmd /c "timeout /t 2 /nobreak >nul & start "" http://localhost:8777"
-
 "%NODE_EXE%" lmu-bridge.js
 
 echo.

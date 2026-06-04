@@ -11,6 +11,7 @@ _*
 
 # Node
 node_modules/
+dist/
 # portable Node.js (vom Starter heruntergeladen)
 node/
 _nodetmp/

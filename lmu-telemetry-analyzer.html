@@ -30,6 +30,8 @@
   .langsw{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden}
   .langsw button{border:0;border-radius:0;padding:6px 10px;font-size:12px;background:var(--panel2);color:var(--muted)}
   .langsw button.active{background:var(--accent);color:#1a1205;font-weight:700}
+  .vbadge{font-size:11px;color:var(--muted);font-family:Consolas,monospace;white-space:nowrap}
+  .vbadge.update a{color:var(--accent);font-weight:700;text-decoration:none;border:1px solid var(--accent);border-radius:6px;padding:2px 7px}
   @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(63,185,80,.55)}70%{box-shadow:0 0 0 7px rgba(63,185,80,0)}100%{box-shadow:0 0 0 0 rgba(63,185,80,0)}}
   .layout{display:grid;grid-template-columns:310px 1fr;height:calc(100% - 53px)}
   aside{background:var(--panel);border-right:1px solid var(--line);overflow:auto;padding:12px}
@@ -112,6 +114,7 @@
   </div>
   <button id="btnReload" data-i18n="reload">↻ Aktualisieren</button>
   <div class="langsw"><button id="langDe" class="active">DE</button><button id="langEn">EN</button></div>
+  <span id="versionBadge" class="vbadge"></span>
   <span class="grow"></span>
   <span id="status" class="status">…</span>
 </header>
@@ -122,6 +125,11 @@
     <select id="sessionSel"></select>
     <div id="metaCard" class="card" style="margin-top:10px;padding:11px 12px"></div>
     <div id="weatherCard" class="card" style="padding:11px 12px"></div>
+    <div id="miniMapCard" class="card" style="padding:11px 12px;display:none">
+      <div class="sec-title" data-i18n="miniMapTitle" style="margin-bottom:6px">Wo gewinne / verliere ich?</div>
+      <div class="chartwrap"><canvas id="cMini" height="160"></canvas></div>
+      <div class="legend" style="margin-top:6px;font-size:11px"><span><i style="background:#3fb950"></i> <span data-i18n="legGain">gewinnt</span></span><span><i style="background:#f85149"></i> <span data-i18n="legLose">verliert</span></span></div>
+    </div>
     <div id="lapPanel">
       <label class="fld" data-i18n="refSource">Referenzquelle</label>
       <select id="refSrcSel"></select>
@@ -145,6 +153,7 @@
         <div class="tab active" data-tab="improve" data-i18n="tabImprove">🎯 Wo verliere ich Zeit?</div>
         <div class="tab" data-tab="compare" data-i18n="tabCompare">📈 Vergleich</div>
         <div class="tab" data-tab="map" data-i18n="tabMap">🗺️ Streckenkarte</div>
+        <div class="tab" data-tab="session" data-i18n="tabSession">📋 Letzte Session</div>
         <div class="tab" data-tab="tyres" data-i18n="tabTyres">🛞 Reifen &amp; Bremsen</div>
         <div class="tab" data-tab="setup" data-i18n="tabSetup">🔧 Setup &amp; Pace</div>
         <div class="tab" data-tab="channels" data-i18n="tabChannels">📊 Alle Kanäle</div>
@@ -181,6 +190,10 @@
           <div class="legend"><span><i style="background:#2f81f7"></i> <span data-i18n="slow">langsam</span></span><span><i style="background:#3fb950"></i> <span data-i18n="medium">mittel</span></span><span><i style="background:#f85149"></i> <span data-i18n="fast">schnell</span></span><span><i style="background:#ff00d0;height:8px;width:8px;border-radius:50%"></i> <span data-i18n="lossZone">Zeitverlust-Zone</span></span></div>
           <div class="chartwrap"><canvas id="cMap" height="520"></canvas><div class="tooltip" id="ttMap"></div></div>
           <div class="hint" id="mapHint" style="margin-top:6px"></div></div>
+      </section>
+
+      <section data-panel="session" style="display:none">
+        <div class="card"><h2 data-i18n="sessOverview">Session-Übersicht</h2><div class="scrollx" id="sessionTable"></div></div>
       </section>
 
       <section data-panel="tyres" style="display:none">
@@ -352,7 +365,9 @@ const STR = {
   errLoad:(m)=>`Fehler beim Laden: ${m}`, noGps:"Keine GPS-Koordinaten in dieser Aufnahme – Streckenkarte nicht verfügbar.", mapLegend:"Linie = Referenzrunde. Magenta-Punkte markieren die größten Zeitverlust-Zonen.", noGpsShort:"Keine GPS-Daten.",
   loadingFile:(f)=>"Lade "+f+" …",
   sectorsTitle:"Sektoren", thTotal:"Gesamt", theoBest:"Theoretische Bestzeit", noSectors:"Keine Sektor-Daten (mind. 1 getimte Runde nötig).",
-  weatherTitle:"Wetter & Strecke", wConditions:"Bedingungen", wAir:"Lufttemperatur", wTrack:"Strecke", wWind:"Wind", wWetness:"Nässe", wDry:"trocken", wWet:(p)=>p+" % nass"
+  weatherTitle:"Wetter & Strecke", wConditions:"Bedingungen", wAir:"Lufttemperatur", wTrack:"Strecke", wWind:"Wind", wWetness:"Nässe", wDry:"trocken", wWet:(p)=>p+" % nass",
+  tabSession:"📋 Letzte Session", sessOverview:"Session-Übersicht", thDeltaBest:"Δ Best", thTop:"Top", thFuelLapH:"Sprit L/Rd", thWearLapH:"Verschl. %/Rd", noLapsSession:"Keine Runden in dieser Session.",
+  miniMapTitle:"Wo gewinne / verliere ich?", legGain:"gewinnt", legLose:"verliert", updateAvail:(v)=>"Neue Version v"+v+" verfügbar – klicken zum Download"
  },
  en:{
   reload:"↻ Refresh", session:"Session", refSource:"Reference source", refLap:"Reference lap (best)", cmpLap:"Comparison lap",
@@ -428,7 +443,9 @@ const STR = {
   errLoad:(m)=>`Error while loading: ${m}`, noGps:"No GPS coordinates in this recording – track map not available.", mapLegend:"Line = reference lap. Magenta dots mark the biggest time-loss zones.", noGpsShort:"No GPS data.",
   loadingFile:(f)=>"Loading "+f+" …",
   sectorsTitle:"Sectors", thTotal:"Total", theoBest:"Theoretical best", noSectors:"No sector data (at least 1 timed lap needed).",
-  weatherTitle:"Weather & track", wConditions:"Conditions", wAir:"Air temp", wTrack:"Track temp", wWind:"Wind", wWetness:"Wetness", wDry:"dry", wWet:(p)=>p+" % wet"
+  weatherTitle:"Weather & track", wConditions:"Conditions", wAir:"Air temp", wTrack:"Track temp", wWind:"Wind", wWetness:"Wetness", wDry:"dry", wWet:(p)=>p+" % wet",
+  tabSession:"📋 Last session", sessOverview:"Session overview", thDeltaBest:"Δ best", thTop:"Top", thFuelLapH:"Fuel L/lap", thWearLapH:"Wear %/lap", noLapsSession:"No laps in this session.",
+  miniMapTitle:"Where do I gain / lose?", legGain:"gain", legLose:"lose", updateAvail:(v)=>"New version v"+v+" available – click to download"
  }
 };
 function t(k,...a){ let v=(STR[LANG]&&STR[LANG][k]); if(v==null)v=STR.de[k]; if(v==null)return k; return typeof v==="function"?v(...a):v; }
@@ -655,7 +672,7 @@ function recompute(){
   if(!refP||!STATE.cmpP){ setStatus(t("lapIncomplete")); return; }
   STATE.refP=refP; STATE.refInfo={lapTime:refTime,label:refLabel,saved:!!saved};
   STATE.ana=analyze(refP,STATE.cmpP);
-  buildLapTable(); renderKPIs(); renderInsights(); renderSectors(); buildCharts(); fillChanSelect(); renderMap(); renderTyres(); redrawAll();
+  buildLapTable(); renderKPIs(); renderInsights(); renderSectors(); renderSession(); buildCharts(); fillChanSelect(); renderMap(); renderMiniMap(); renderTyres(); redrawAll();
   const single = !saved && STATE.refLap===STATE.cmpLap;
   document.getElementById("singleLapNote").innerHTML = single ? `<div class="banner">${t("singleLap")}</div>` : "";
   renderPit();
@@ -713,25 +730,40 @@ function renderChan(){ const sel=document.getElementById("chanSel"); const c=STA
   chanRef=chanOnGrid(STATE.model,STATE.refLap,c); chanCmp=chanOnGrid(STATE.model,STATE.cmpLap,c); renderChanPlot(); }
 function renderChanPlot(){ plot(document.getElementById("cChan"),{xmax:STATE.refP.L,series:[{ys:chanRef,color:"#2f81f7",width:1.7},{ys:chanCmp,color:"#ff7a00",width:1.5}],zones:STATE.ana.zones.slice(0,6)}); }
 
-function renderMap(){
-  const cv=document.getElementById("cMap"),{ctx,w,h}=fitCanvas(cv); ctx.clearRect(0,0,w,h);
-  const p=STATE.refP, hint=document.getElementById("mapHint");
-  if(!p.lat||!p.lon){ hint.textContent=t("noGps"); ctx.fillStyle="#6b7686";ctx.font="13px Segoe UI";ctx.fillText(t("noGpsShort"),20,30); cv._geom=null; return; }
-  hint.textContent=t("mapLegend");
+function projectTrack(p,w,h,pad){
   const N=p.lat.length, lat0=p.lat[N>>1]*Math.PI/180;
   const X=new Float64Array(N),Y=new Float64Array(N);
   for(let i=0;i<N;i++){ X[i]=p.lon[i]*Math.cos(lat0); Y[i]=p.lat[i]; }
   let xmn=Infinity,xmx=-Infinity,ymn=Infinity,ymx=-Infinity;
   for(let i=0;i<N;i++){ if(X[i]<xmn)xmn=X[i];if(X[i]>xmx)xmx=X[i];if(Y[i]<ymn)ymn=Y[i];if(Y[i]>ymx)ymx=Y[i]; }
-  const pad=34,sc=Math.min((w-2*pad)/((xmx-xmn)||1),(h-2*pad)/((ymx-ymn)||1));
+  const sc=Math.min((w-2*pad)/((xmx-xmn)||1),(h-2*pad)/((ymx-ymn)||1));
   const ox=pad+((w-2*pad)-(xmx-xmn)*sc)/2, oy=pad+((h-2*pad)-(ymx-ymn)*sc)/2;
-  const PX=i=>ox+(X[i]-xmn)*sc, PY=i=>h-(oy+(Y[i]-ymn)*sc);
-  let vmn=Infinity,vmx=-Infinity; for(let i=0;i<N;i++){const v=p.speed[i];if(v<vmn)vmn=v;if(v>vmx)vmx=v;}
-  ctx.lineWidth=4;ctx.lineCap="round";
-  for(let i=1;i<N;i++){ ctx.strokeStyle=speedColor((p.speed[i]-vmn)/((vmx-vmn)||1)); ctx.beginPath();ctx.moveTo(PX(i-1),PY(i-1));ctx.lineTo(PX(i),PY(i));ctx.stroke(); }
-  STATE.ana.zones.slice(0,6).forEach(z=>{ const i=(z.a+z.b)>>1; ctx.fillStyle="#ff00d0";ctx.beginPath();ctx.arc(PX(i),PY(i),6,0,7);ctx.fill();
-    ctx.fillStyle="#fff";ctx.font="bold 11px Segoe UI";ctx.fillText("+"+z.loss.toFixed(2)+"s",PX(i)+9,PY(i)+4); });
-  ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(PX(0),PY(0),5,0,7);ctx.fill(); cv._geom=null;
+  return { N, PX:i=>ox+(X[i]-xmn)*sc, PY:i=>h-(oy+(Y[i]-ymn)*sc) };
+}
+function drawTrackMap(cv, p, segColor, o){
+  o=o||{}; const {ctx,w,h}=fitCanvas(cv); ctx.clearRect(0,0,w,h);
+  if(!p||!p.lat||!p.lon){ if(o.noGpsText){ctx.fillStyle="#6b7686";ctx.font="13px Segoe UI";ctx.fillText(o.noGpsText,16,26);} cv._geom=null; return false; }
+  const g=projectTrack(p,w,h,o.pad||30), N=g.N;
+  ctx.lineWidth=o.lw||4; ctx.lineCap="round";
+  for(let i=1;i<N;i++){ ctx.strokeStyle=segColor(i); ctx.beginPath();ctx.moveTo(g.PX(i-1),g.PY(i-1));ctx.lineTo(g.PX(i),g.PY(i));ctx.stroke(); }
+  if(o.zones) o.zones.forEach(z=>{ const i=(z.a+z.b)>>1; ctx.fillStyle="#ff00d0";ctx.beginPath();ctx.arc(g.PX(i),g.PY(i),o.dot||6,0,7);ctx.fill();
+    if(o.zoneText){ctx.fillStyle="#fff";ctx.font="bold 11px Segoe UI";ctx.fillText("+"+z.loss.toFixed(2)+"s",g.PX(i)+9,g.PY(i)+4);} });
+  ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(g.PX(0),g.PY(0),o.dot?4:5,0,7);ctx.fill(); cv._geom=null; return true;
+}
+function renderMap(){
+  const p=STATE.refP, hint=document.getElementById("mapHint");
+  let vmn=Infinity,vmx=-Infinity; if(p&&p.speed){for(let i=0;i<p.speed.length;i++){const v=p.speed[i];if(v<vmn)vmn=v;if(v>vmx)vmx=v;}}
+  const ok=drawTrackMap(document.getElementById("cMap"), p, i=>speedColor((p.speed[i]-vmn)/((vmx-vmn)||1)),
+    {zones:STATE.ana?STATE.ana.zones.slice(0,6):null, zoneText:true, noGpsText:t("noGpsShort")});
+  hint.textContent = ok? t("mapLegend") : t("noGps");
+}
+function renderMiniMap(){
+  const card=document.getElementById("miniMapCard"), p=STATE.refP, a=STATE.ana;
+  if(!p||!p.lat||!p.lon||!a){ if(card)card.style.display="none"; return; }
+  card.style.display="";
+  const d=a.delta;
+  drawTrackMap(document.getElementById("cMini"), p, i=>{ const s=d[i]-d[i-1]; return s>0.0006?"#f85149":(s<-0.0006?"#3fb950":"#46506a"); },
+    {zones:a.zones.slice(0,4), zoneText:false, lw:3.5, dot:4, pad:14});
 }
 function speedColor(t){ t=Math.max(0,Math.min(1,t));
   if(t<0.5){const u=t/0.5;return `rgb(${47+16*u|0},${129+56*u|0},${247-167*u|0})`;}
@@ -802,7 +834,7 @@ async function poll(){
   try{
     const r=await apiGet("/api/sessions");
     if(r.error){ showBridgeHelp(r); return; }
-    STATE.sessions=r.sessions||[]; STATE.telDir=r.telDir;
+    STATE.sessions=r.sessions||[]; STATE.telDir=r.telDir; checkVersion();
     if(!STATE.sessions.length){ showBridgeHelp({telDir:r.telDir, empty:true}); return; }
     buildSessionSelect();
     const newest=STATE.sessions[0];
@@ -863,6 +895,12 @@ function computeConsumption(m){
     if(cFuel){const a=sampleChanAtTime(cFuel,l.t0),b=sampleChanAtTime(cFuel,l.t1); if(a!=null&&b!=null&&a-b>0.02){fS+=a-b;fN++;}}
     if(wearWh){const a=wheelVal(wearWh,l.t0),b=wheelVal(wearWh,l.t1); if(a&&b){let worst=0;for(let k=0;k<a.length;k++){const d=a[k]-b[k];if(d>worst)worst=d;} if(worst>0.001){wS+=worst;wN++;}}}
   });
+  // Pro-Runde-Werte (alle vollständigen Runden) für die Session-Übersicht
+  m.laps.forEach(l=>{ if(!l.complete)return;
+    if(cVE){const a=sampleChanAtTime(cVE,l.t0),b=sampleChanAtTime(cVE,l.t1); if(a!=null&&b!=null) l.veLap=Math.max(0,a-b);}
+    if(cFuel){const a=sampleChanAtTime(cFuel,l.t0),b=sampleChanAtTime(cFuel,l.t1); if(a!=null&&b!=null) l.fuelLap=Math.max(0,a-b);}
+    if(wearWh){const a=wheelVal(wearWh,l.t0),b=wheelVal(wearWh,l.t1); if(a&&b){let w=0;for(let k=0;k<a.length;k++){const d=a[k]-b[k];if(d>w)w=d;} l.wearLap=w;}}
+  });
   m.avgLap = lN? lS/lN : (m.laps[0]?m.laps[0].lapTime:0);
   m.bestLap = complete.length? Math.min.apply(null,complete.map(l=>l.lapTime)) : m.avgLap;
   m.vePerLap = veN? veS/veN : null;
@@ -913,6 +951,24 @@ function renderWeather(){
   rows.push([t("wWetness"), (wet==null||wet<0.02)? t("wDry") : t("wWet",(wet*100).toFixed(0))]);
   el.style.display = (rows.length>1)? "" : "none";
   el.innerHTML='<div class="meta-grid">'+rows.map(r=>`<div class="k">${r[0]}</div><div>${r[1]}</div>`).join("")+'</div>';
+}
+/* ---------- Session-Übersicht (Detail letzte Session) ---------- */
+function renderSession(){
+  const m=STATE.model, el=document.getElementById("sessionTable"); if(!m||!el)return;
+  const laps=m.laps.filter(l=>l.complete);
+  if(!laps.length){ el.innerHTML=`<div class="hint">${t("noLapsSession")}</div>`; return; }
+  const best=Math.min.apply(null,laps.map(l=>l.lapTime));
+  let html=`<table class="pit setuptbl" style="font-size:12.5px"><thead><tr><th>#</th><th>${t("lapTime")}</th><th>${t("thDeltaBest")}</th><th>${t("thTop")}</th><th>${t("thVELap")}</th><th>${t("thFuelLapH")}</th><th>${t("thWearLapH")}</th></tr></thead><tbody>`;
+  laps.forEach(l=>{ const d=l.lapTime-best, isBest=l.lapTime===best;
+    html+=`<tr${isBest?' class="fastest"':''}><td>${t("lapN",l.index+1)}${l.outlap?' <span class="pill">Out</span>':''}${l.inlap?' <span class="pill">In</span>':''}</td>`
+      +`<td><b>${fmtTime(l.lapTime)}</b></td>`
+      +`<td${d>0.001?' class="up"':d<-0.001?' class="down"':''}>${isBest?'—':fmtDelta(d)}</td>`
+      +`<td>${l.topSpeed!=null?l.topSpeed.toFixed(0)+' km/h':'—'}</td>`
+      +`<td>${l.veLap!=null?l.veLap.toFixed(2)+' %':'—'}</td>`
+      +`<td>${l.fuelLap!=null?l.fuelLap.toFixed(2)+' L':'—'}</td>`
+      +`<td>${l.wearLap!=null?l.wearLap.toFixed(2)+' %':'—'}</td></tr>`;
+  });
+  el.innerHTML=html+"</tbody></table>";
 }
 
 /* ---------- Persistente Bestzeit-Referenz (localStorage; später optional MotherDuck-Sync) ---------- */
@@ -1148,9 +1204,21 @@ function steeringCorrections(m,lap){ const cs=findChan(m.channels,ALIAS.steer); 
 /* ---------- Tabs ---------- */
 function switchTab(name){ document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.tab===name));
   document.querySelectorAll("section[data-panel]").forEach(s=>s.style.display=s.dataset.panel===name?"":"none");
-  setTimeout(()=>{redrawAll(); if(name==="map")renderMap(); if(name==="pit")renderPit(); if(name==="tyres")renderTyres(); if(name==="setup")renderSetup();},0); }
+  setTimeout(()=>{redrawAll(); if(name==="map")renderMap(); if(name==="pit")renderPit(); if(name==="tyres")renderTyres(); if(name==="setup")renderSetup(); if(name==="session")renderSession();},0); }
 document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>switchTab(t.dataset.tab));
-addEventListener("resize",()=>{redrawAll(); if(STATE.refP)renderMap();});
+addEventListener("resize",()=>{redrawAll(); if(STATE.refP){renderMap();renderMiniMap();}});
+
+/* ---------- Versionscheck (GitHub Releases) ---------- */
+const APP_VERSION="1.3.0";
+let versionChecked=false;
+function cmpVer(a,b){ const pa=String(a).split("."),pb=String(b).split("."); for(let i=0;i<3;i++){ const x=parseInt(pa[i]||0,10),y=parseInt(pb[i]||0,10); if(x>y)return 1; if(x<y)return -1; } return 0; }
+async function checkVersion(){ if(versionChecked)return; versionChecked=true;
+  const badge=document.getElementById("versionBadge"); badge.textContent="v"+APP_VERSION; badge.classList.remove("update");
+  try{ const r=await apiGet("/api/version"); const lat=(r.latest||"").replace(/^v/,"");
+    if(lat && cmpVer(lat,APP_VERSION)>0){ const url=r.url||("https://github.com/"+(r.repo||"mzluzifer/lmu-telemetry-analyzer")+"/releases");
+      badge.innerHTML=`<a href="${url}" target="_blank" rel="noopener" title="${t("updateAvail",lat)}">⬆ v${lat}</a>`; badge.classList.add("update"); }
+  }catch(e){}
+}
 
 /* ---------- Start ---------- */
 document.getElementById("langDe").onclick=()=>setLang("de");

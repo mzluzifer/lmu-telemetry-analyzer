@@ -1,0 +1,12 @@
+{
+  "name": "lmu-telemetry-analyzer",
+  "version": "1.3.0",
+  "description": "Lokale Telemetrie-Analyse für Le Mans Ultimate",
+  "bin": "lmu-bridge.js",
+  "license": "MIT",
+  "pkg": {
+    "assets": ["lmu-telemetry-analyzer.html"],
+    "targets": ["node18-win-x64"],
+    "outputPath": "dist"
+  }
+}
