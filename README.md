@@ -46,13 +46,10 @@ In `…\Le Mans Ultimate\UserData\player\Settings.JSON`:
 
 ## Starten
 
-**Am einfachsten – ohne Konsolenfenster:** **`Start LMU Telemetrie.vbs`** doppelklicken. Die App startet
+**Am einfachsten – ohne Konsolenfenster:** **`LMU-Telemetrie.exe`** doppelklicken. Die App startet
 komplett im Hintergrund (**kein schwarzes Kommandozeilenfenster**) und öffnet den Browser automatisch.
 Beenden über den **⏻-Button** oben rechts in der App. (DuckDB-CLI wird beim ersten Start geladen, falls
-nicht daneben vorhanden.)
-
-**Alternativ – direkt die `.exe`:** `LMU-Telemetrie.exe` doppelklicken. Funktioniert genauso, zeigt dabei
-aber ein Konsolenfenster (offen lassen, solange du die App benutzt).
+nicht daneben vorhanden. Meldungen schreibt die App in `lmu-telemetrie.log` neben der EXE.)
 
 **Aus dem Quellcode (mit Node.js):** **`Start LMU Telemetrie.cmd`** doppelklicken. Beim ersten Start
 beschafft das Skript automatisch **Node.js** (falls nötig) und die **DuckDB-CLI**, startet die Bridge und

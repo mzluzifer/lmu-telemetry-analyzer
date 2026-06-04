@@ -21,11 +21,33 @@ const BASE = process.pkg ? path.dirname(process.execPath) : __dirname;
 const DUCKDB = path.join(BASE, "duckdbcli", "duckdb.exe");
 const HTML = path.join(__dirname, "lmu-telemetry-analyzer.html"); // im pkg-Snapshot eingebettet
 const REPO = "mzluzifer/lmu-telemetry-analyzer";
-const APP_VERSION = "1.6.0";
+const APP_VERSION = "1.6.1";
 
-// Konsolenfenster verstecken: Der Start erfolgt über "Start LMU Telemetrie.vbs"
-// (WScript.Shell.Run mit Fensterstil 0 = versteckte Konsole). Die .exe selbst startet
-// den Server direkt; die Flags --hidden / --no-hide werden akzeptiert (No-Op).
+// --- Kein Konsolenfenster -------------------------------------------------
+// Die .exe wird als GUI-Subsystem gebaut (Post-Build-Patch in build-exe.ps1),
+// daher erscheint beim Start KEIN Kommandozeilenfenster. In diesem Modus gibt es
+// kein gültiges stdout/stderr – Schreibzugriffe darauf würden den Prozess
+// abstürzen lassen. Deshalb leiten wir alle Konsolenausgaben in eine Logdatei
+// neben der EXE um und fassen process.stdout/stderr nicht an.
+// (--hidden / --no-hide werden weiterhin als No-Op akzeptiert.)
+if (process.pkg) {
+  const LOG = path.join(BASE, "lmu-telemetrie.log");
+  const util = require("util");
+  try { if (fs.existsSync(LOG) && fs.statSync(LOG).size > 1024 * 1024) fs.writeFileSync(LOG, ""); } catch (_) {}
+  const writeLog = (lvl, args) => {
+    try {
+      fs.appendFileSync(LOG, "[" + new Date().toISOString() + "] " + lvl + "  " +
+        args.map(a => typeof a === "string" ? a : util.inspect(a)).join(" ") + "\r\n");
+    } catch (_) {}
+  };
+  console.log = (...a) => writeLog("INFO ", a);
+  console.info = (...a) => writeLog("INFO ", a);
+  console.warn = (...a) => writeLog("WARN ", a);
+  console.error = (...a) => writeLog("ERROR", a);
+  console.debug = (...a) => writeLog("DEBUG", a);
+  process.on("uncaughtException", e => writeLog("FATAL", [e && e.stack || e]));
+  process.on("unhandledRejection", e => writeLog("FATAL", [e && e.stack || e]));
+}
 
 // DuckDB-CLI bei Bedarf herunterladen (für die .exe ohne Begleitskript)
 function ensureDuckDB() {
@@ -35,16 +57,16 @@ function ensureDuckDB() {
   try {
     execFileSync("powershell", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command",
       "$ErrorActionPreference='Stop'; $z=Join-Path $env:TEMP 'lmu_dk.zip'; Invoke-WebRequest 'https://github.com/duckdb/duckdb/releases/download/v1.4.0/duckdb_cli-windows-amd64.zip' -OutFile $z; Expand-Archive $z -DestinationPath '" + dir + "' -Force; Remove-Item $z -Force"],
-      { stdio: "inherit" });
+      { stdio: "ignore", windowsHide: true });
   } catch (e) { console.error("DuckDB-Download fehlgeschlagen:", e.message); }
 }
-function openBrowser() { try { exec('start "" http://localhost:' + PORT); } catch (e) {} }
+function openBrowser() { try { exec('start "" http://localhost:' + PORT, { windowsHide: true }); } catch (e) {} }
 // Neueste Release-Version ermitteln: erst gh (auch bei privatem Repo), sonst öffentliche API
 function getLatestVersion(cb) {
   for (const g of ["gh", "C:\\Program Files\\GitHub CLI\\gh.exe"]) {
     try {
       const out = execFileSync(g, ["api", "repos/" + REPO + "/releases/latest", "--jq", ".tag_name + \"|\" + .html_url"],
-        { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
+        { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"], windowsHide: true });
       const p = out.trim().split("|"); if (p[0]) return cb(p[0], p[1] || "");
     } catch (e) {}
   }

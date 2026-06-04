@@ -1,6 +1,6 @@
 @echo off
-REM Hinweis: Fuer einen Start OHNE Konsolenfenster die Datei
-REM   "Start LMU Telemetrie.vbs"  doppelklicken (nutzt die .exe).
+REM Hinweis: Fuer einen Start OHNE Konsolenfenster einfach
+REM   "LMU-Telemetrie.exe"  doppelklicken (startet komplett im Hintergrund).
 REM Dieses Skript ist der Quellcode-/Node-Weg und zeigt bewusst ein Fenster
 REM (Erststart laedt ggf. Node.js + DuckDB und kann Rueckfragen anzeigen).
 cd /d "%~dp0"
