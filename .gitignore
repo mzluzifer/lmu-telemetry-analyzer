@@ -11,6 +11,9 @@ _*
 
 # Node
 node_modules/
+# portable Node.js (vom Starter heruntergeladen)
+node/
+_nodetmp/
 
 # OS
 Thumbs.db

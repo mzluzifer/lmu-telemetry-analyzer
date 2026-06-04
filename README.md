@@ -17,11 +17,12 @@ einen Boxenstopp-/Energie-Rechner und einen Setup-Vergleich.
 - 🔧 **Setup & Pace** – vergleicht zwei deiner Sessions: was am Setup geändert wurde und wie sich die Bestzeit verändert hat, plus Setup-Hinweise aus der Telemetrie.
 - ⛽ **Boxenstopp-Rechner** – aus Rennlänge, Reifensätzen, Fahrern und der gemessenen Pace/Verbrauch: Stint-Längen, Ziel-Virtual-Energy pro Runde, schnellste Gesamtzeit-Strategie, Fahrer-Einteilung (berücksichtigt Energie **und** Reifenverschleiß).
 - ⏺ **Live** – lädt nach jedem Stint automatisch die neue Aufnahme; während eine Aufnahme läuft (Datei gesperrt) wird die letzte fertige Session gezeigt.
+- 🌐 **Sprache** – Oberfläche per Klick umschaltbar zwischen **Deutsch und Englisch** (oben rechts).
 
 ## Voraussetzungen
 
 - Windows mit **Le Mans Ultimate** (PC, ab v1.2 mit nativer Telemetrie-Aufzeichnung).
-- **Node.js** (https://nodejs.org) – wird zum Ausführen der Bridge gebraucht.
+- **Node.js** – zum Ausführen der Bridge. Wird vom Starter **automatisch installiert bzw. heruntergeladen**, falls nicht vorhanden (per winget oder portabel ohne Adminrechte).
 - Telemetrie-Aufzeichnung in LMU aktiviert (siehe unten).
 
 ## Telemetrie-Aufzeichnung in LMU aktivieren
@@ -38,9 +39,9 @@ In `…\Le Mans Ultimate\UserData\player\Settings.JSON`:
 
 ## Starten
 
-**`Start LMU Telemetrie.cmd`** doppelklicken. Beim ersten Start lädt das Skript automatisch die passende
-DuckDB-CLI herunter, startet die Bridge und öffnet `http://localhost:8777` im Browser.
-Das Konsolenfenster offen lassen, solange du die App benutzt.
+**`Start LMU Telemetrie.cmd`** doppelklicken. Beim ersten Start beschafft das Skript automatisch
+**Node.js** (falls nötig) und die **DuckDB-CLI**, startet die Bridge und öffnet `http://localhost:8777`
+im Browser. Das Konsolenfenster offen lassen, solange du die App benutzt.
 
 Der Telemetrie-Ordner wird automatisch über die Steam-Bibliotheken gefunden. Abweichender Pfad:
 ```

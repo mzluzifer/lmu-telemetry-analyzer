@@ -27,6 +27,9 @@
   .live .led{width:9px;height:9px;border-radius:50%;background:#555}
   .live.on .led{background:var(--good);box-shadow:0 0 0 0 rgba(63,185,80,.6);animation:pulse 1.8s infinite}
   .live.on{color:var(--txt);border-color:var(--good)}
+  .langsw{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden}
+  .langsw button{border:0;border-radius:0;padding:6px 10px;font-size:12px;background:var(--panel2);color:var(--muted)}
+  .langsw button.active{background:var(--accent);color:#1a1205;font-weight:700}
   @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(63,185,80,.55)}70%{box-shadow:0 0 0 7px rgba(63,185,80,0)}100%{box-shadow:0 0 0 0 rgba(63,185,80,0)}}
   .layout{display:grid;grid-template-columns:310px 1fr;height:calc(100% - 53px)}
   aside{background:var(--panel);border-right:1px solid var(--line);overflow:auto;padding:12px}
@@ -107,28 +110,29 @@
   <div id="liveToggle" class="live on" title="Automatisch neueste Aufnahme laden (nach jedem Stint)">
     <span class="led"></span><span id="liveLabel">Live</span>
   </div>
-  <button id="btnReload">↻ Aktualisieren</button>
+  <button id="btnReload" data-i18n="reload">↻ Aktualisieren</button>
+  <div class="langsw"><button id="langDe" class="active">DE</button><button id="langEn">EN</button></div>
   <span class="grow"></span>
-  <span id="status" class="status">Verbinde mit Bridge…</span>
+  <span id="status" class="status">…</span>
 </header>
 
 <div class="layout">
   <aside>
-    <div class="sec-title">Session</div>
+    <div class="sec-title" data-i18n="session">Session</div>
     <select id="sessionSel"></select>
     <div id="metaCard" class="card" style="margin-top:10px;padding:11px 12px"></div>
     <div id="lapPanel">
-      <label class="fld">Referenzquelle</label>
+      <label class="fld" data-i18n="refSource">Referenzquelle</label>
       <select id="refSrcSel"></select>
-      <button id="btnSaveRef">📌 Diese Runde als Bestzeit speichern</button>
-      <label class="fld">Referenz-Runde (Bestzeit)</label>
+      <button id="btnSaveRef" data-i18n="saveRef">📌 Diese Runde als Bestzeit speichern</button>
+      <label class="fld" data-i18n="refLap">Referenz-Runde (Bestzeit)</label>
       <select id="refSel"></select>
-      <label class="fld">Vergleichs-Runde</label>
+      <label class="fld" data-i18n="cmpLap">Vergleichs-Runde</label>
       <select id="cmpSel"></select>
       <div class="scrollx" style="margin-top:12px">
-        <table id="lapTable"><thead><tr><th>#</th><th>Rundenzeit</th><th>Top-Speed</th></tr></thead><tbody></tbody></table>
+        <table id="lapTable"><thead><tr><th>#</th><th data-i18n="lapTime">Rundenzeit</th><th data-i18n="topSpeed">Top-Speed</th></tr></thead><tbody></tbody></table>
       </div>
-      <div class="hint" style="margin-top:8px">Klick = Vergleichsrunde · <span class="kbd">R</span>+Klick = Referenz</div>
+      <div class="hint" style="margin-top:8px" data-i18n-html="lapHint">Klick = Vergleichsrunde · <span class="kbd">R</span>+Klick = Referenz</div>
     </div>
   </aside>
 
@@ -137,105 +141,105 @@
 
     <div id="app" style="display:none">
       <div class="tabs">
-        <div class="tab active" data-tab="improve">🎯 Wo verliere ich Zeit?</div>
-        <div class="tab" data-tab="compare">📈 Vergleich</div>
-        <div class="tab" data-tab="map">🗺️ Streckenkarte</div>
-        <div class="tab" data-tab="tyres">🛞 Reifen &amp; Bremsen</div>
-        <div class="tab" data-tab="setup">🔧 Setup &amp; Pace</div>
-        <div class="tab" data-tab="channels">📊 Alle Kanäle</div>
-        <div class="tab" data-tab="pit">⛽ Boxenstopp-Rechner</div>
-        <div class="tab" data-tab="diag">🔩 Diagnose</div>
+        <div class="tab active" data-tab="improve" data-i18n="tabImprove">🎯 Wo verliere ich Zeit?</div>
+        <div class="tab" data-tab="compare" data-i18n="tabCompare">📈 Vergleich</div>
+        <div class="tab" data-tab="map" data-i18n="tabMap">🗺️ Streckenkarte</div>
+        <div class="tab" data-tab="tyres" data-i18n="tabTyres">🛞 Reifen &amp; Bremsen</div>
+        <div class="tab" data-tab="setup" data-i18n="tabSetup">🔧 Setup &amp; Pace</div>
+        <div class="tab" data-tab="channels" data-i18n="tabChannels">📊 Alle Kanäle</div>
+        <div class="tab" data-tab="pit" data-i18n="tabPit">⛽ Boxenstopp-Rechner</div>
+        <div class="tab" data-tab="diag" data-i18n="tabDiag">🔩 Diagnose</div>
       </div>
 
       <section data-panel="improve">
         <div id="singleLapNote"></div>
-        <div class="card"><h2>Rundenübersicht</h2><div class="grid2" id="kpis"></div></div>
+        <div class="card"><h2 data-i18n="lapOverview">Rundenübersicht</h2><div class="grid2" id="kpis"></div></div>
         <div class="card">
-          <h2>Zeitdelta über die Runde <span class="muted" id="deltaSub"></span></h2>
-          <div class="legend"><span><i style="background:var(--ref)"></i> Referenz (0-Linie)</span><span><i style="background:var(--cmp)"></i> Vergleich · über 0 = langsamer</span></div>
+          <h2><span data-i18n="deltaTitle">Zeitdelta über die Runde</span> <span class="muted" id="deltaSub"></span></h2>
+          <div class="legend"><span><i style="background:var(--ref)"></i> <span data-i18n="legRefZero">Referenz (0-Linie)</span></span><span><i style="background:var(--cmp)"></i> <span data-i18n="legCmpSlower">Vergleich · über 0 = langsamer</span></span></div>
           <div class="chartwrap"><canvas id="cDelta" height="220"></canvas><div class="tooltip" id="ttDelta"></div></div>
-          <div class="hint" style="margin-top:6px">Steigt die Linie an, verlierst du dort Zeit. Die größten Anstiege sind deine Hauptbaustellen.</div>
+          <div class="hint" style="margin-top:6px" data-i18n="deltaHint">Steigt die Linie an, verlierst du dort Zeit. Die größten Anstiege sind deine Hauptbaustellen.</div>
         </div>
-        <div class="card"><h2>Größte Zeitverlust-Zonen &amp; Tipps</h2><div id="insights"></div></div>
+        <div class="card"><h2 data-i18n="lossZones">Größte Zeitverlust-Zonen &amp; Tipps</h2><div id="insights"></div></div>
       </section>
 
       <section data-panel="compare" style="display:none">
-        <div class="card"><h2>Geschwindigkeit (km/h)</h2>
-          <div class="legend"><span><i style="background:var(--ref)"></i> Referenz</span><span><i style="background:var(--cmp)"></i> Vergleich</span></div>
+        <div class="card"><h2 data-i18n="speedKmh">Geschwindigkeit (km/h)</h2>
+          <div class="legend"><span><i style="background:var(--ref)"></i> <span data-i18n="reference">Referenz</span></span><span><i style="background:var(--cmp)"></i> <span data-i18n="comparison">Vergleich</span></span></div>
           <div class="chartwrap"><canvas id="cSpeed" height="210"></canvas><div class="tooltip" id="ttSpeed"></div></div></div>
-        <div class="card"><h2>Gas &amp; Bremse (%)</h2>
-          <div class="legend"><span><i style="background:var(--good)"></i> Gas Ref</span><span><i style="background:#8fe3a3"></i> Gas Vgl</span><span><i style="background:var(--bad)"></i> Bremse Ref</span><span><i style="background:#ff9b95"></i> Bremse Vgl</span></div>
+        <div class="card"><h2 data-i18n="throttleBrake">Gas &amp; Bremse (%)</h2>
+          <div class="legend"><span><i style="background:var(--good)"></i> <span data-i18n="legThrRef">Gas Ref</span></span><span><i style="background:#8fe3a3"></i> <span data-i18n="legThrCmp">Gas Vgl</span></span><span><i style="background:var(--bad)"></i> <span data-i18n="legBrkRef">Bremse Ref</span></span><span><i style="background:#ff9b95"></i> <span data-i18n="legBrkCmp">Bremse Vgl</span></span></div>
           <div class="chartwrap"><canvas id="cPedals" height="190"></canvas><div class="tooltip" id="ttPedals"></div></div></div>
-        <div class="card"><h2>Lenkung &amp; Gang</h2>
+        <div class="card"><h2 data-i18n="steerGear">Lenkung &amp; Gang</h2>
           <div class="chartwrap"><canvas id="cSteer" height="170"></canvas><div class="tooltip" id="ttSteer"></div></div></div>
       </section>
 
       <section data-panel="map" style="display:none">
-        <div class="card"><h2>Streckenkarte – nach Geschwindigkeit eingefärbt</h2>
-          <div class="legend"><span><i style="background:#2f81f7"></i> langsam</span><span><i style="background:#3fb950"></i> mittel</span><span><i style="background:#f85149"></i> schnell</span><span><i style="background:#ff00d0;height:8px;width:8px;border-radius:50%"></i> Zeitverlust-Zone</span></div>
+        <div class="card"><h2 data-i18n="mapTitle">Streckenkarte – nach Geschwindigkeit eingefärbt</h2>
+          <div class="legend"><span><i style="background:#2f81f7"></i> <span data-i18n="slow">langsam</span></span><span><i style="background:#3fb950"></i> <span data-i18n="medium">mittel</span></span><span><i style="background:#f85149"></i> <span data-i18n="fast">schnell</span></span><span><i style="background:#ff00d0;height:8px;width:8px;border-radius:50%"></i> <span data-i18n="lossZone">Zeitverlust-Zone</span></span></div>
           <div class="chartwrap"><canvas id="cMap" height="520"></canvas><div class="tooltip" id="ttMap"></div></div>
           <div class="hint" id="mapHint" style="margin-top:6px"></div></div>
       </section>
 
       <section data-panel="tyres" style="display:none">
         <div class="card">
-          <h2>Reifen – Vergleichsrunde <span class="muted" id="tyLapNote"></span></h2>
+          <h2><span data-i18n="tyresCmpLap">Reifen – Vergleichsrunde</span> <span class="muted" id="tyLapNote"></span></h2>
           <div id="tyreWheels" class="wheelgrid"></div>
-          <div class="hint" style="margin-top:8px">Werte = Durchschnitt über die Runde. Temperatur-Felder: innen · mitte · außen (zur Sturz-/Druckbeurteilung). Reifen-Fenster grün ≈ 75–105 °C.</div>
+          <div class="hint" style="margin-top:8px" data-i18n="tyresHint">Werte = Durchschnitt über die Runde. Temperatur-Felder: innen · mitte · außen (zur Sturz-/Druckbeurteilung). Reifen-Fenster grün ≈ 75–105 °C.</div>
         </div>
-        <div class="card"><h2>Reifen-Hinweise (Druck · Sturz · Balance)</h2><div id="tyreTips"></div></div>
-        <div class="card"><h2>Bremsen-Temperatur (°C, Rundendurchschnitt)</h2><div id="brakeWheels" class="wheelgrid"></div></div>
-        <div class="card"><h2>Verschleiß über die Session</h2><div id="wearSession"></div></div>
+        <div class="card"><h2 data-i18n="tyreTipsTitle">Reifen-Hinweise (Druck · Sturz · Balance)</h2><div id="tyreTips"></div></div>
+        <div class="card"><h2 data-i18n="brakeTemp">Bremsen-Temperatur (°C, Rundendurchschnitt)</h2><div id="brakeWheels" class="wheelgrid"></div></div>
+        <div class="card"><h2 data-i18n="wearSessionTitle">Verschleiß über die Session</h2><div id="wearSession"></div></div>
       </section>
 
       <section data-panel="setup" style="display:none">
         <div class="card">
-          <h2>Hat eine Setup-Änderung deine Pace verändert?</h2>
-          <div class="hint">Vergleicht zwei deiner aufgezeichneten Sessions (gleiches Auto + Strecke): was wurde geändert und wie hat sich die Bestzeit verändert. Sessions werden beim Laden automatisch im Browser gemerkt.</div>
+          <h2 data-i18n="setupPaceTitle">Hat eine Setup-Änderung deine Pace verändert?</h2>
+          <div class="hint" data-i18n="setupPaceHint">Vergleicht zwei deiner aufgezeichneten Sessions (gleiches Auto + Strecke): was wurde geändert und wie hat sich die Bestzeit verändert. Sessions werden beim Laden automatisch im Browser gemerkt.</div>
           <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
-            <div style="flex:1;min-width:200px"><label class="fld">Session A (vorher)</label><select id="setupSelA"></select></div>
-            <div style="flex:1;min-width:200px"><label class="fld">Session B (nachher)</label><select id="setupSelB"></select></div>
+            <div style="flex:1;min-width:200px"><label class="fld" data-i18n="sessionA">Session A (vorher)</label><select id="setupSelA"></select></div>
+            <div style="flex:1;min-width:200px"><label class="fld" data-i18n="sessionB">Session B (nachher)</label><select id="setupSelB"></select></div>
           </div>
           <div id="setupPace" style="margin-top:12px"></div>
         </div>
-        <div class="card"><h2>Geänderte Setup-Parameter (A → B)</h2><div class="scrollx" id="setupDiff"></div></div>
-        <div class="card"><h2>Setup-Hinweise aus der Telemetrie – wo ansetzen?</h2><div id="setupHints"></div></div>
+        <div class="card"><h2 data-i18n="setupDiffTitle">Geänderte Setup-Parameter (A → B)</h2><div class="scrollx" id="setupDiff"></div></div>
+        <div class="card"><h2 data-i18n="setupHintsTitle">Setup-Hinweise aus der Telemetrie – wo ansetzen?</h2><div id="setupHints"></div></div>
       </section>
 
       <section data-panel="channels" style="display:none">
-        <div class="card"><h2>Beliebigen Kanal vergleichen</h2>
+        <div class="card"><h2 data-i18n="anyChannel">Beliebigen Kanal vergleichen</h2>
           <select id="chanSel" style="max-width:340px"></select>
           <div class="chartwrap" style="margin-top:12px"><canvas id="cChan" height="240"></canvas><div class="tooltip" id="ttChan"></div></div></div>
       </section>
 
       <section data-panel="pit" style="display:none">
         <div class="card">
-          <h2>Renn-Eckdaten</h2>
+          <h2 data-i18n="raceData">Renn-Eckdaten</h2>
           <div class="pitgrid">
-            <label>Rennlänge (Minuten)<input id="piRace" type="number" min="1" value="360"></label>
-            <label>Reifensätze<input id="piTyres" type="number" min="1" value="4"></label>
-            <label>Anzahl Fahrer<input id="piDrivers" type="number" min="1" value="2"></label>
-            <label>Boxenstopp-Verlust (s)<input id="piPit" type="number" min="0" value="52"></label>
-            <label>Ø Rundenzeit (m:ss.s)<input id="piLap" type="text" value=""></label>
-            <label>Virtual Energy / Runde (%)<input id="piVE" type="number" step="0.01" value=""></label>
-            <label>Sprit / Runde (L)<input id="piFuel" type="number" step="0.1" value=""></label>
-            <label>Reifenverschleiß / Runde (%)<input id="piWear" type="number" step="0.05" value=""></label>
-            <label>Zeitverlust je % Sparen (s/Rd)<input id="piPenalty" type="number" step="0.05" value="0.2"></label>
+            <label><span data-i18n="raceLength">Rennlänge (Minuten)</span><input id="piRace" type="number" min="1" value="360"></label>
+            <label><span data-i18n="tyreSets">Reifensätze</span><input id="piTyres" type="number" min="1" value="4"></label>
+            <label><span data-i18n="numDrivers">Anzahl Fahrer</span><input id="piDrivers" type="number" min="1" value="2"></label>
+            <label><span data-i18n="pitLoss">Boxenstopp-Verlust (s)</span><input id="piPit" type="number" min="0" value="52"></label>
+            <label><span data-i18n="avgLapInput">Ø Rundenzeit (m:ss.s)</span><input id="piLap" type="text" value=""></label>
+            <label><span data-i18n="vePerLapInput">Virtual Energy / Runde (%)</span><input id="piVE" type="number" step="0.01" value=""></label>
+            <label><span data-i18n="fuelPerLapInput">Sprit / Runde (L)</span><input id="piFuel" type="number" step="0.1" value=""></label>
+            <label><span data-i18n="wearPerLapInput">Reifenverschleiß / Runde (%)</span><input id="piWear" type="number" step="0.05" value=""></label>
+            <label><span data-i18n="savePenaltyInput">Zeitverlust je % Sparen (s/Rd)</span><input id="piPenalty" type="number" step="0.05" value="0.2"></label>
           </div>
           <div class="hint" id="piTeleNote" style="margin-top:10px"></div>
         </div>
-        <div class="card"><h2>Empfehlung – schnellste Gesamtzeit</h2><div id="piHead"></div></div>
-        <div class="card"><h2>Fahrer-Einteilung</h2><div id="piDriverPlan"></div></div>
-        <div class="card"><h2>Strategie-Vergleich</h2>
-          <div class="scrollx"><table id="piTable" class="pit"><thead><tr><th>Stopps</th><th>Stints</th><th>Rd/Stint</th><th>Min/Stint</th><th>VE %/Rd</th><th>Sparen</th><th>L/Stint</th><th>Gesamtzeit</th><th>OK</th></tr></thead><tbody></tbody></table></div>
-          <div class="hint" style="margin-top:6px">Grün = schnellste machbare Strategie. „Sparen" = nötiger Lift&amp;Coast gegenüber deinem Telemetrie-Verbrauch (⚠ = mehr als machbar).</div>
+        <div class="card"><h2 data-i18n="recommendation">Empfehlung – schnellste Gesamtzeit</h2><div id="piHead"></div></div>
+        <div class="card"><h2 data-i18n="driverSplit">Fahrer-Einteilung</h2><div id="piDriverPlan"></div></div>
+        <div class="card"><h2 data-i18n="strategyCompare">Strategie-Vergleich</h2>
+          <div class="scrollx"><table id="piTable" class="pit"><thead><tr><th data-i18n="thStops">Stopps</th><th data-i18n="thStints">Stints</th><th data-i18n="thLapsStint">Rd/Stint</th><th data-i18n="thMinStint">Min/Stint</th><th data-i18n="thVELap">VE %/Rd</th><th data-i18n="thSave">Sparen</th><th data-i18n="thLStint">L/Stint</th><th data-i18n="thTotalTime">Gesamtzeit</th><th data-i18n="thOk">OK</th></tr></thead><tbody></tbody></table></div>
+          <div class="hint" style="margin-top:6px" data-i18n="strategyHint">Grün = schnellste machbare Strategie. „Sparen" = nötiger Lift&amp;Coast gegenüber deinem Telemetrie-Verbrauch (⚠ = mehr als machbar).</div>
         </div>
       </section>
 
       <section data-panel="diag" style="display:none">
-        <div class="card"><h2>Bridge / Verbindung</h2><div id="diagConn" class="mono"></div></div>
-        <div class="card"><h2>Kanäle in dieser Session (<span id="chanCount">0</span>)</h2>
-          <div class="scrollx"><table id="diagChans"><thead><tr><th>Name</th><th>Einheit</th><th>Hz</th><th>Samples</th><th>min</th><th>max</th></tr></thead><tbody></tbody></table></div></div>
+        <div class="card"><h2 data-i18n="bridgeConn">Bridge / Verbindung</h2><div id="diagConn" class="mono"></div></div>
+        <div class="card"><h2><span data-i18n="channelsInSession">Kanäle in dieser Session</span> (<span id="chanCount">0</span>)</h2>
+          <div class="scrollx"><table id="diagChans"><thead><tr><th data-i18n="thName">Name</th><th data-i18n="thUnit">Einheit</th><th>Hz</th><th data-i18n="thSamples">Samples</th><th>min</th><th>max</th></tr></thead><tbody></tbody></table></div></div>
       </section>
     </div>
   </main>
@@ -265,7 +269,177 @@ async function apiGet(path){
 function fmtTime(s){ if(s==null||!isFinite(s))return "—"; const m=Math.floor(s/60),sec=s-m*60; return m>0? m+":"+sec.toFixed(3).padStart(6,"0") : sec.toFixed(3); }
 function fmtDelta(s){ return (s>=0?"+":"−")+Math.abs(s).toFixed(3); }
 function escapeHtml(s){ return (s==null?"":String(s)).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c])); }
-function setStatus(t){ document.getElementById("status").textContent=t; }
+function setStatus(s){ document.getElementById("status").textContent=s; }
+
+/* ===================== Internationalisierung (DE/EN) ===================== */
+function lsGetSafe(k,d){ try{ const v=localStorage.getItem(k); return v==null?d:JSON.parse(v); }catch(e){ return d; } }
+let LANG = lsGetSafe("lmuLang","de");
+function WL(k){ return (LANG==="en"?["FL","FR","RL","RR"]:["VL","VR","HL","HR"])[k]; }
+const STR = {
+ de:{
+  reload:"↻ Aktualisieren", session:"Session", refSource:"Referenzquelle", refLap:"Referenz-Runde (Bestzeit)", cmpLap:"Vergleichs-Runde",
+  lapTime:"Rundenzeit", topSpeed:"Top-Speed", lapHint:'Klick = Vergleichsrunde · <span class="kbd">R</span>+Klick = Referenz',
+  tabImprove:"🎯 Wo verliere ich Zeit?", tabCompare:"📈 Vergleich", tabMap:"🗺️ Streckenkarte", tabTyres:"🛞 Reifen & Bremsen",
+  tabSetup:"🔧 Setup & Pace", tabChannels:"📊 Alle Kanäle", tabPit:"⛽ Boxenstopp-Rechner", tabDiag:"🔩 Diagnose",
+  lapOverview:"Rundenübersicht", deltaTitle:"Zeitdelta über die Runde", legRefZero:"Referenz (0-Linie)", legCmpSlower:"Vergleich · über 0 = langsamer",
+  deltaHint:"Steigt die Linie an, verlierst du dort Zeit. Die größten Anstiege sind deine Hauptbaustellen.", lossZones:"Größte Zeitverlust-Zonen & Tipps",
+  speedKmh:"Geschwindigkeit (km/h)", reference:"Referenz", comparison:"Vergleich", throttleBrake:"Gas & Bremse (%)",
+  legThrRef:"Gas Ref", legThrCmp:"Gas Vgl", legBrkRef:"Bremse Ref", legBrkCmp:"Bremse Vgl", steerGear:"Lenkung & Gang",
+  mapTitle:"Streckenkarte – nach Geschwindigkeit eingefärbt", slow:"langsam", medium:"mittel", fast:"schnell", lossZone:"Zeitverlust-Zone",
+  tyresCmpLap:"Reifen – Vergleichsrunde", tyresHint:"Werte = Durchschnitt über die Runde. Temperatur-Felder: innen · mitte · außen (zur Sturz-/Druckbeurteilung). Reifen-Fenster grün ≈ 75–105 °C.",
+  tyreTipsTitle:"Reifen-Hinweise (Druck · Sturz · Balance)", brakeTemp:"Bremsen-Temperatur (°C, Rundendurchschnitt)", wearSessionTitle:"Verschleiß über die Session",
+  setupPaceTitle:"Hat eine Setup-Änderung deine Pace verändert?", setupPaceHint:"Vergleicht zwei deiner aufgezeichneten Sessions (gleiches Auto + Strecke): was wurde geändert und wie hat sich die Bestzeit verändert. Sessions werden beim Laden automatisch im Browser gemerkt.",
+  sessionA:"Session A (vorher)", sessionB:"Session B (nachher)", setupDiffTitle:"Geänderte Setup-Parameter (A → B)", setupHintsTitle:"Setup-Hinweise aus der Telemetrie – wo ansetzen?",
+  anyChannel:"Beliebigen Kanal vergleichen", raceData:"Renn-Eckdaten", raceLength:"Rennlänge (Minuten)", tyreSets:"Reifensätze", numDrivers:"Anzahl Fahrer",
+  pitLoss:"Boxenstopp-Verlust (s)", avgLapInput:"Ø Rundenzeit (m:ss.s)", vePerLapInput:"Virtual Energy / Runde (%)", fuelPerLapInput:"Sprit / Runde (L)",
+  wearPerLapInput:"Reifenverschleiß / Runde (%)", savePenaltyInput:"Zeitverlust je % Sparen (s/Rd)", recommendation:"Empfehlung – schnellste Gesamtzeit",
+  driverSplit:"Fahrer-Einteilung", strategyCompare:"Strategie-Vergleich", thStops:"Stopps", thStints:"Stints", thLapsStint:"Rd/Stint", thMinStint:"Min/Stint",
+  thVELap:"VE %/Rd", thSave:"Sparen", thLStint:"L/Stint", thTotalTime:"Gesamtzeit", thOk:"OK",
+  strategyHint:'Grün = schnellste machbare Strategie. „Sparen" = nötiger Lift&Coast gegenüber deinem Telemetrie-Verbrauch (⚠ = mehr als machbar).',
+  bridgeConn:"Bridge / Verbindung", channelsInSession:"Kanäle in dieser Session", thName:"Name", thUnit:"Einheit", thSamples:"Samples",
+  saveRef:"📌 Diese Runde als Bestzeit speichern", saveRefUpdate:(t)=>"📌 Bestzeit aktualisieren ("+t+")",
+  live:"Live", manual:"Manuell", connecting:"Verbinde mit Bridge…", waitingRec:"Warte auf Aufnahmen…",
+  loaded:(n,c)=>`Geladen: ${n} Runden · ${c} vollständig`, recActive:"⏺ Aufnahme läuft – warte auf Abschluss…",
+  errPrefix:(m)=>"Fehler: "+m, lapIncomplete:"Runde unvollständig", bestSaved:(t,tr)=>`Bestzeit-Referenz gespeichert: ${t} · ${tr}`,
+  bestRefOpt:(t,d)=>`⭐ Bestzeit ${t} (${d})`, sessionBest:"Beste Runde dieser Session", refStar:(t)=>"⭐ Bestzeit "+t,
+  kRef:"Referenz", kDiff:"Differenz", slower:"langsamer", faster:"schneller", kSumLoss:"Summe Zeitverlust", zonesN:(n)=>n+" Zonen",
+  kFullThr:"Vollgas-Anteil", kCoast:"Segeln (kein Gas/Bremse)", refPct:(x)=>"Ref "+x+" %", lapN:(i)=>"R"+i,
+  singleLap:'Nur <b>eine vollständige Runde</b> in dieser Aufnahme – für Delta &amp; Zonen brauchst du mind. 2 Runden (oder speichere eine Bestzeit als Referenz). Geschwindigkeit, Gas/Bremse und Streckenkarte werden trotzdem angezeigt.',
+  deltaSum:(d)=>` · Gesamt ${d} s`, noZones:"Keine nennenswerten Verlustzonen – Runden sehr ähnlich oder nur eine Runde vorhanden.",
+  zoneLbl:(i,a,b)=>`Zone ${i}: ${a}–${b} m`,
+  tMinSpeed:(k)=>`Deine Mindestgeschwindigkeit liegt hier <b>${k} km/h</b> unter der Referenz – mehr Kurvenspeed möglich (früher/sanfter einlenken, weniger einbremsen).`,
+  tBrakeEarly:(m)=>`Du bremst ca. <b>${m} m früher</b> als die Referenz – ein späterer Bremspunkt bringt Zeit.`,
+  tBrakeLate:(m)=>`Du bremst ca. <b>${m} m später</b> – falls du danach Speed verlierst, evtl. zu spät/zu hart.`,
+  tLiftEarly:(m)=>`Du gehst rund <b>${m} m früher vom Gas</b> – versuche, länger am Gas zu bleiben.`,
+  tThrExit:(m)=>`Am Kurvenausgang gehst du <b>${m} m später</b> wieder voll aufs Gas.`, tSmall:"Kleiner Zeitverlust – Linie/Speed minimal sauberer möglich.",
+  pitFill:"Bitte Rennlänge (Minuten) und Ø Rundenzeit angeben.", pitNoStrat:"Keine machbare Strategie – Energie-Sparen wäre zu groß. Erhöhe die VE/Runde-Annahme oder die Stopps.",
+  pitStops:(s)=>`${s} Boxenstopp${s===1?"":"s"}`, pitStints:(S,l,m)=>`${S} Stints · <b>${l} Runden/Stint</b> (~${m} min)`,
+  veRunde:"Virtual Energy / Runde", veSave:(p)=>`≈ ${p} % sparen (Lift&Coast)`, veEnough:"Energie reicht – pushen", veExact:"genau passend",
+  fuelStint:"Sprit / Stint", fuelTotal:(l)=>`Rennen gesamt ${l}`, raceDist:"Renndistanz", lapsN:(n)=>n+" Runden", driveTime:(t)=>`reine Fahrzeit ~${t}`,
+  estTotal:"Geschätzte Gesamtzeit", stopsXs:(s,p)=>`${s} Stopp(s) × ${p} s`, tyresLbl:"Reifen:", tyreFresh:(n)=>`${n} Satz/Sätze frisch`,
+  tyreReused:(r,s)=>` · ${r} Stint(s) auf gebrauchten Reifen (nur ${s} Sätze vorhanden)`, tyreLast:(l,w)=>` · halten ~<b>${l}</b> Rd/Stint (${w} %/Rd) – begrenzt die Stintlänge`,
+  pitExplain:(ms,pen)=>`„Schnellste Gesamtzeit" = wenigste Stopps, bei denen Energie-Sparen (≤ ${ms} %) <b>und</b> Reifen mitspielen; Sparen kostet hier ${pen} s/Runde je %.`,
+  driverK:(n)=>"Fahrer "+n, stintsN:(n)=>`${n} Stint${n===1?"":"s"}`, driverInfo:(m,l)=>`~${m} min · ~${l} Runden`,
+  moreDrivers:(D,S)=>`Mehr Fahrer (${D}) als Stints (${S}) – nicht jeder kommt zum Einsatz.`,
+  teleNote:(tr,a,b,v,f,w)=>`Aus Telemetrie · <b>${tr}</b> · Ø Runde <b>${a}</b> · Bestzeit ${b} · VE ${v} · Sprit ${f} · Verschleiß ${w}. Tipp: trage für die Planung deine erwartete <b>Renn-Pace</b> ein (nicht die Outlap).`,
+  mTrack:"Strecke", mVehicle:"Fahrzeug", mClass:"Klasse", mSession:"Session", mWeather:"Wetter", mDriver:"Fahrer", mRecording:"Aufnahme",
+  pressure:"Druck", restProfile:"Rest-Profil", noTyreTemp:"Keine Reifen-Temperatur-Kanäle in dieser Aufnahme.", noTyreData:"Reifentemperaturen unauffällig (oder Datenbasis zu klein, z. B. nur Outlap).",
+  noBrakeTemp:"Keine Bremstemperatur-Daten.", noWearData:"Keine Verschleißdaten.", wRest:(w)=>w+" Rest", usedPct:(p)=>p+" % verbraucht",
+  wearWorst:(w,l)=>`Ø Verschleiß (schlechtestes Rad): <b>${w}</b>${l}`, holdLaps:(n)=>` → Reifen halten ~<b>${n}</b> Runden.`,
+  tPressHigh:(w,d)=>`<b>${w}</b>: Mitte ${d} °C heißer als die Kanten → <b>Reifendruck zu hoch</b>.`,
+  tPressLow:(w,d)=>`<b>${w}</b>: Mitte ${d} °C kühler als die Kanten → <b>Reifendruck zu niedrig</b>.`,
+  tCamberOut:(w,d)=>`<b>${w}</b>: Außenkante ${d} °C heißer als innen → <b>mehr negativen Sturz</b> wählen.`,
+  tCamberIn:(w,d)=>`<b>${w}</b>: Innenkante ${d} °C heißer → evtl. <b>zu viel Sturz</b>.`,
+  balUnder:(d)=>`<b>Balance:</b> Vorderreifen ${d} °C heißer → Tendenz <b>Untersteuern</b> (Front überlastet): Front-ARB weicher / mehr Frontflügel / Heck-ARB härter.`,
+  balOver:(d)=>`<b>Balance:</b> Hinterreifen ${d} °C heißer → Tendenz <b>Übersteuern</b> (Heck überlastet): mehr Heckflügel / Heck-ARB weicher / Traktion erhöhen.`,
+  tyresCold:(t)=>`Reifen insgesamt <b>kalt</b> (Ø ${t} °C) – evtl. nur Outlap; im Renntrimm steigen sie. Sonst Druck erhöhen / wärmer fahren.`,
+  brAvg:"Ø", brMax:"Max",
+  setupNeed:(n,car)=>`Es ist erst <b>${n}</b> Session für ${car} auf dieser Strecke gemerkt. Sobald du mit <b>geändertem Setup</b> eine weitere Session fährst, kannst du hier den Pace-Effekt sehen.`,
+  kBestA:"Bestzeit A (vorher)", kBestB:"Bestzeit B (nachher)", kPaceEffect:"Pace-Effekt B−A", fasterEmoji:"schneller 🎉", kChanged:"Geänderte Parameter", seeBelow:"siehe unten",
+  thParam:"Parameter", thBefore:"A (vorher)", thAfter:"B (nachher)", noDiff:"Keine Unterschiede – identisches Setup in beiden Sessions.",
+  hUnder:"Tendenz Untersteuern", hUnderD:(d)=>`Vorderreifen ${d} °C heißer als hinten. <b>Wo:</b> v. a. langsame/mittlere Kurven (vgl. Verlustzonen). <b>Setup:</b> Front-ARB weicher, mehr Frontflügel, oder Heck-ARB härter; Frontdruck ggf. senken.`,
+  hOver:"Tendenz Übersteuern", hOverD:(d)=>`Hinterreifen ${d} °C heißer als vorne. <b>Setup:</b> mehr Heckflügel, Heck-ARB weicher, Diff-Power senken, Traktionskontrolle prüfen.`,
+  hPress:(w)=>"Druck "+w, hPressHi:(w)=>`Reifenmitte deutlich heißer → Druck ${w} senken.`, hPressLo:(w)=>`Kanten heißer als Mitte → Druck ${w} erhöhen.`,
+  hNervous:"Evtl. nervöses Heck", hNervousD:(c)=>`Auffällig viele schnelle Gegenlenk-Korrekturen (${c}) – möglicher Hinweis auf instabiles Heck am Kurvenausgang. <b>Setup-Idee:</b> Heckstabilität/Traktion erhöhen (Diff-Power runter, Heck-ARB weicher, mehr Heckflügel). Mit Vorsicht – auch Randstein-/Bumps können das auslösen.`,
+  hintsCaveat:"Tendenzen aus den Messdaten (v. a. Reifentemperaturen) – kein Ersatz für systematisches Testen. Mit mehreren schnellen Runden aussagekräftiger.",
+  noHints:"Keine klaren Setup-Tendenzen (Datenbasis evtl. zu klein – fahr ein paar schnelle Runden am Stück).",
+  noComplete:"Keine vollständige Runde.", helpOffline:(m)=>`Die App läuft, aber die Bridge antwortet nicht (${m}). Starte sie über <b>Start LMU Telemetrie.cmd</b> und öffne dann <code>http://localhost:8777</code>.`,
+  helpEmpty:(d)=>`Bridge läuft ✓, aber im Ordner <span class="mono">${d}</span> liegt noch keine <code>.duckdb</code>-Aufnahme. Aktiviere in LMU die Telemetrie-Aufzeichnung und fahre einen Stint.`,
+  helpTitle:"Bridge nicht erreichbar oder keine Aufnahmen gefunden.", recBanner:(n,t)=>`⏺ <b>Aufnahme läuft gerade</b> (${n}, ${t}) – die Datei ist noch gesperrt. Angezeigt wird deine <b>letzte abgeschlossene Session</b>. Sobald du den Stint beendest oder in die Box fährst, lädt die App die neue Aufnahme automatisch.`,
+  diagConn:(dir,file,st,len)=>`Bridge: <span class="ok">verbunden</span> · Ordner: <span class="mono">${dir}</span><br>Datei: <b>${file}</b> · Kanal-Startzeit: ${st} s · Strecke ${len} m`,
+  errLoad:(m)=>`Fehler beim Laden: ${m}`, noGps:"Keine GPS-Koordinaten in dieser Aufnahme – Streckenkarte nicht verfügbar.", mapLegend:"Linie = Referenzrunde. Magenta-Punkte markieren die größten Zeitverlust-Zonen.", noGpsShort:"Keine GPS-Daten.",
+  loadingFile:(f)=>"Lade "+f+" …"
+ },
+ en:{
+  reload:"↻ Refresh", session:"Session", refSource:"Reference source", refLap:"Reference lap (best)", cmpLap:"Comparison lap",
+  lapTime:"Lap time", topSpeed:"Top speed", lapHint:'Click = comparison lap · <span class="kbd">R</span>+click = reference',
+  tabImprove:"🎯 Where am I losing time?", tabCompare:"📈 Compare", tabMap:"🗺️ Track map", tabTyres:"🛞 Tyres & brakes",
+  tabSetup:"🔧 Setup & pace", tabChannels:"📊 All channels", tabPit:"⛽ Pit stop calculator", tabDiag:"🔩 Diagnostics",
+  lapOverview:"Lap overview", deltaTitle:"Time delta over the lap", legRefZero:"Reference (zero line)", legCmpSlower:"Comparison · above 0 = slower",
+  deltaHint:"When the line rises, you're losing time there. The biggest climbs are your main weak spots.", lossZones:"Biggest time-loss zones & tips",
+  speedKmh:"Speed (km/h)", reference:"Reference", comparison:"Comparison", throttleBrake:"Throttle & brake (%)",
+  legThrRef:"Thr ref", legThrCmp:"Thr cmp", legBrkRef:"Brake ref", legBrkCmp:"Brake cmp", steerGear:"Steering & gear",
+  mapTitle:"Track map – coloured by speed", slow:"slow", medium:"medium", fast:"fast", lossZone:"time-loss zone",
+  tyresCmpLap:"Tyres – comparison lap", tyresHint:"Values = average over the lap. Temperature cells: inner · centre · outer (for camber/pressure assessment). Tyre window green ≈ 75–105 °C.",
+  tyreTipsTitle:"Tyre advice (pressure · camber · balance)", brakeTemp:"Brake temperature (°C, lap average)", wearSessionTitle:"Wear over the session",
+  setupPaceTitle:"Did a setup change affect your pace?", setupPaceHint:"Compares two of your recorded sessions (same car + track): what changed and how your best lap changed. Sessions are remembered automatically in the browser when loaded.",
+  sessionA:"Session A (before)", sessionB:"Session B (after)", setupDiffTitle:"Changed setup parameters (A → B)", setupHintsTitle:"Setup advice from telemetry – where to start?",
+  anyChannel:"Compare any channel", raceData:"Race parameters", raceLength:"Race length (minutes)", tyreSets:"Tyre sets", numDrivers:"Number of drivers",
+  pitLoss:"Pit stop loss (s)", avgLapInput:"Avg lap time (m:ss.s)", vePerLapInput:"Virtual energy / lap (%)", fuelPerLapInput:"Fuel / lap (L)",
+  wearPerLapInput:"Tyre wear / lap (%)", savePenaltyInput:"Time loss per % saving (s/lap)", recommendation:"Recommendation – fastest total time",
+  driverSplit:"Driver split", strategyCompare:"Strategy comparison", thStops:"Stops", thStints:"Stints", thLapsStint:"Laps/stint", thMinStint:"Min/stint",
+  thVELap:"VE %/lap", thSave:"Save", thLStint:"L/stint", thTotalTime:"Total time", thOk:"OK",
+  strategyHint:'Green = fastest feasible strategy. "Save" = required lift&coast vs your telemetry consumption (⚠ = more than feasible).',
+  bridgeConn:"Bridge / connection", channelsInSession:"Channels in this session", thName:"Name", thUnit:"Unit", thSamples:"Samples",
+  saveRef:"📌 Save this lap as best reference", saveRefUpdate:(t)=>"📌 Update best reference ("+t+")",
+  live:"Live", manual:"Manual", connecting:"Connecting to bridge…", waitingRec:"Waiting for recordings…",
+  loaded:(n,c)=>`Loaded: ${n} laps · ${c} complete`, recActive:"⏺ Recording in progress – waiting for it to finish…",
+  errPrefix:(m)=>"Error: "+m, lapIncomplete:"Lap incomplete", bestSaved:(t,tr)=>`Best reference saved: ${t} · ${tr}`,
+  bestRefOpt:(t,d)=>`⭐ Best ${t} (${d})`, sessionBest:"Best lap of this session", refStar:(t)=>"⭐ Best "+t,
+  kRef:"Reference", kDiff:"Difference", slower:"slower", faster:"faster", kSumLoss:"Total time lost", zonesN:(n)=>n+" zones",
+  kFullThr:"Full throttle", kCoast:"Coasting (no throttle/brake)", refPct:(x)=>"Ref "+x+" %", lapN:(i)=>"L"+i,
+  singleLap:'Only <b>one complete lap</b> in this recording – for delta &amp; zones you need at least 2 laps (or save a best lap as reference). Speed, throttle/brake and the track map are still shown.',
+  deltaSum:(d)=>` · total ${d} s`, noZones:"No significant loss zones – laps very similar or only one lap available.",
+  zoneLbl:(i,a,b)=>`Zone ${i}: ${a}–${b} m`,
+  tMinSpeed:(k)=>`Your minimum speed here is <b>${k} km/h</b> below the reference – more corner speed possible (turn in earlier/smoother, brake less).`,
+  tBrakeEarly:(m)=>`You brake about <b>${m} m earlier</b> than the reference – a later braking point gains time.`,
+  tBrakeLate:(m)=>`You brake about <b>${m} m later</b> – if you lose speed afterwards, possibly too late/too hard.`,
+  tLiftEarly:(m)=>`You lift off about <b>${m} m earlier</b> – try to stay on the throttle longer.`,
+  tThrExit:(m)=>`On corner exit you get back to full throttle <b>${m} m later</b>.`, tSmall:"Small time loss – line/speed marginally cleaner possible.",
+  pitFill:"Please enter race length (minutes) and avg lap time.", pitNoStrat:"No feasible strategy – energy saving would be too high. Increase the VE/lap assumption or the number of stops.",
+  pitStops:(s)=>`${s} pit stop${s===1?"":"s"}`, pitStints:(S,l,m)=>`${S} stints · <b>${l} laps/stint</b> (~${m} min)`,
+  veRunde:"Virtual energy / lap", veSave:(p)=>`≈ ${p} % save (lift&coast)`, veEnough:"Energy is enough – push", veExact:"exactly right",
+  fuelStint:"Fuel / stint", fuelTotal:(l)=>`race total ${l}`, raceDist:"Race distance", lapsN:(n)=>n+" laps", driveTime:(t)=>`pure driving time ~${t}`,
+  estTotal:"Estimated total time", stopsXs:(s,p)=>`${s} stop(s) × ${p} s`, tyresLbl:"Tyres:", tyreFresh:(n)=>`${n} fresh set(s)`,
+  tyreReused:(r,s)=>` · ${r} stint(s) on used tyres (only ${s} sets available)`, tyreLast:(l,w)=>` · last ~<b>${l}</b> laps/stint (${w} %/lap) – limits stint length`,
+  pitExplain:(ms,pen)=>`"Fastest total time" = fewest stops where energy saving (≤ ${ms} %) <b>and</b> tyres allow it; saving costs ${pen} s/lap per % here.`,
+  driverK:(n)=>"Driver "+n, stintsN:(n)=>`${n} stint${n===1?"":"s"}`, driverInfo:(m,l)=>`~${m} min · ~${l} laps`,
+  moreDrivers:(D,S)=>`More drivers (${D}) than stints (${S}) – not everyone will drive.`,
+  teleNote:(tr,a,b,v,f,w)=>`From telemetry · <b>${tr}</b> · avg lap <b>${a}</b> · best ${b} · VE ${v} · fuel ${f} · wear ${w}. Tip: enter your expected <b>race pace</b> for planning (not the out-lap).`,
+  mTrack:"Track", mVehicle:"Vehicle", mClass:"Class", mSession:"Session", mWeather:"Weather", mDriver:"Driver", mRecording:"Recording",
+  pressure:"Pressure", restProfile:"Remaining", noTyreTemp:"No tyre temperature channels in this recording.", noTyreData:"Tyre temperatures look fine (or too little data, e.g. only out-lap).",
+  noBrakeTemp:"No brake temperature data.", noWearData:"No wear data.", wRest:(w)=>w+" rem.", usedPct:(p)=>p+" % used",
+  wearWorst:(w,l)=>`Avg wear (worst tyre): <b>${w}</b>${l}`, holdLaps:(n)=>` → tyres last ~<b>${n}</b> laps.`,
+  tPressHigh:(w,d)=>`<b>${w}</b>: centre ${d} °C hotter than the edges → <b>tyre pressure too high</b>.`,
+  tPressLow:(w,d)=>`<b>${w}</b>: centre ${d} °C cooler than the edges → <b>tyre pressure too low</b>.`,
+  tCamberOut:(w,d)=>`<b>${w}</b>: outer edge ${d} °C hotter than inner → choose <b>more negative camber</b>.`,
+  tCamberIn:(w,d)=>`<b>${w}</b>: inner edge ${d} °C hotter → possibly <b>too much camber</b>.`,
+  balUnder:(d)=>`<b>Balance:</b> front tyres ${d} °C hotter → tendency to <b>understeer</b> (front overworked): softer front ARB / more front wing / stiffer rear ARB.`,
+  balOver:(d)=>`<b>Balance:</b> rear tyres ${d} °C hotter → tendency to <b>oversteer</b> (rear overworked): more rear wing / softer rear ARB / improve traction.`,
+  tyresCold:(t)=>`Tyres overall <b>cold</b> (avg ${t} °C) – maybe just out-lap; they heat up at race pace. Otherwise raise pressure / push more.`,
+  brAvg:"Avg", brMax:"Max",
+  setupNeed:(n,car)=>`Only <b>${n}</b> session remembered for ${car} on this track. Once you drive another session with a <b>changed setup</b>, you'll see the pace effect here.`,
+  kBestA:"Best A (before)", kBestB:"Best B (after)", kPaceEffect:"Pace effect B−A", fasterEmoji:"faster 🎉", kChanged:"Changed parameters", seeBelow:"see below",
+  thParam:"Parameter", thBefore:"A (before)", thAfter:"B (after)", noDiff:"No differences – identical setup in both sessions.",
+  hUnder:"Tendency: understeer", hUnderD:(d)=>`Front tyres ${d} °C hotter than rear. <b>Where:</b> mostly slow/medium corners (cf. loss zones). <b>Setup:</b> softer front ARB, more front wing, or stiffer rear ARB; lower front pressure if needed.`,
+  hOver:"Tendency: oversteer", hOverD:(d)=>`Rear tyres ${d} °C hotter than front. <b>Setup:</b> more rear wing, softer rear ARB, lower diff power, check traction control.`,
+  hPress:(w)=>"Pressure "+w, hPressHi:(w)=>`Tyre centre clearly hotter → lower pressure ${w}.`, hPressLo:(w)=>`Edges hotter than centre → raise pressure ${w}.`,
+  hNervous:"Possibly nervous rear", hNervousD:(c)=>`Noticeably many quick counter-steer corrections (${c}) – possible hint of an unstable rear on corner exit. <b>Setup idea:</b> increase rear stability/traction (lower diff power, softer rear ARB, more rear wing). With caution – kerbs/bumps can cause this too.`,
+  hintsCaveat:"Tendencies from the measured data (mainly tyre temperatures) – no substitute for systematic testing. More meaningful with several fast laps.",
+  noHints:"No clear setup tendencies (data may be too little – drive a few fast laps in a row).",
+  noComplete:"No complete lap.", helpOffline:(m)=>`The app is running, but the bridge isn't responding (${m}). Start it via <b>Start LMU Telemetrie.cmd</b> and open <code>http://localhost:8777</code>.`,
+  helpEmpty:(d)=>`Bridge running ✓, but no <code>.duckdb</code> recording in <span class="mono">${d}</span> yet. Enable telemetry recording in LMU and drive a stint.`,
+  helpTitle:"Bridge unreachable or no recordings found.", recBanner:(n,t)=>`⏺ <b>Recording in progress</b> (${n}, ${t}) – the file is still locked. Showing your <b>last completed session</b>. As soon as you finish the stint or pit, the app loads the new recording automatically.`,
+  diagConn:(dir,file,st,len)=>`Bridge: <span class="ok">connected</span> · folder: <span class="mono">${dir}</span><br>File: <b>${file}</b> · channel start: ${st} s · track ${len} m`,
+  errLoad:(m)=>`Error while loading: ${m}`, noGps:"No GPS coordinates in this recording – track map not available.", mapLegend:"Line = reference lap. Magenta dots mark the biggest time-loss zones.", noGpsShort:"No GPS data.",
+  loadingFile:(f)=>"Loading "+f+" …"
+ }
+};
+function t(k,...a){ let v=(STR[LANG]&&STR[LANG][k]); if(v==null)v=STR.de[k]; if(v==null)return k; return typeof v==="function"?v(...a):v; }
+function applyStaticI18n(){
+  document.querySelectorAll("[data-i18n]").forEach(el=>{ el.textContent=t(el.dataset.i18n); });
+  document.querySelectorAll("[data-i18n-html]").forEach(el=>{ el.innerHTML=t(el.dataset.i18nHtml); });
+}
+function setLang(l){
+  LANG=l; try{localStorage.setItem("lmuLang",JSON.stringify(l));}catch(e){}
+  document.documentElement.lang=l;
+  document.getElementById("langDe").classList.toggle("active",l==="de");
+  document.getElementById("langEn").classList.toggle("active",l==="en");
+  applyStaticI18n();
+  if(STATE.model){ renderMeta(); refreshRefSrc(); recompute(); renderDiag();
+    setStatus(t("loaded", STATE.model.laps.length, STATE.model.laps.filter(l=>l.complete).length)); }
+  else if(STATE.sessions&&STATE.sessions.length){ buildSessionSelect(); }
+}
 
 /* ---------- Kanal-Aliasse ---------- */
 function norm(s){ return s.toLowerCase().replace(/[^a-z0-9]/g,""); }
@@ -408,17 +582,17 @@ function brakePoint(p,a,b){ if(!p.brk)return null; const pad=Math.max(0,a-40); f
 function liftPoint(p,a,b){ if(!p.thr)return null; const pad=Math.max(0,a-60); let last=null; for(let i=pad;i<=b;i++){ if(p.thr[i]>90)last=i; } return last; }
 function buildTips(z,refP,cmpP){
   const tips=[], g=refP.grid;
-  if(z.speedDiff<-2) tips.push(`Deine Mindestgeschwindigkeit liegt hier <b>${Math.abs(z.speedDiff).toFixed(0)} km/h</b> unter der Referenz – mehr Kurvenspeed möglich (früher/sanfter einlenken, weniger einbremsen).`);
+  if(z.speedDiff<-2) tips.push(t("tMinSpeed",Math.abs(z.speedDiff).toFixed(0)));
   const bpR=brakePoint(refP,z.a,z.b), bpC=brakePoint(cmpP,z.a,z.b);
   if(bpR!=null&&bpC!=null){ const dm=g[bpC]-g[bpR];
-    if(dm<-6) tips.push(`Du bremst ca. <b>${Math.abs(dm).toFixed(0)} m früher</b> als die Referenz – ein späterer Bremspunkt bringt Zeit.`);
-    else if(dm>6) tips.push(`Du bremst ca. <b>${dm.toFixed(0)} m später</b> – falls du danach Speed verlierst, evtl. zu spät/zu hart.`); }
+    if(dm<-6) tips.push(t("tBrakeEarly",Math.abs(dm).toFixed(0)));
+    else if(dm>6) tips.push(t("tBrakeLate",dm.toFixed(0))); }
   const lpR=liftPoint(refP,z.a,z.b), lpC=liftPoint(cmpP,z.a,z.b);
-  if(lpR!=null&&lpC!=null){ const dm=g[lpC]-g[lpR]; if(dm<-6) tips.push(`Du gehst rund <b>${Math.abs(dm).toFixed(0)} m früher vom Gas</b> – versuche, länger am Gas zu bleiben.`); }
+  if(lpR!=null&&lpC!=null){ const dm=g[lpC]-g[lpR]; if(dm<-6) tips.push(t("tLiftEarly",Math.abs(dm).toFixed(0))); }
   if(cmpP.thr&&refP.thr){ const exit=Math.min(z.b+50,refP.thr.length-1); let rOn=null,cOn=null;
     for(let i=z.b;i<=exit;i++){ if(rOn==null&&refP.thr[i]>80)rOn=i; if(cOn==null&&cmpP.thr[i]>80)cOn=i; }
-    if(rOn!=null&&cOn!=null&&g[cOn]-g[rOn]>6) tips.push(`Am Kurvenausgang gehst du <b>${(g[cOn]-g[rOn]).toFixed(0)} m später</b> wieder voll aufs Gas.`); }
-  if(!tips.length) tips.push(`Kleiner Zeitverlust – Linie/Speed minimal sauberer möglich.`);
+    if(rOn!=null&&cOn!=null&&g[cOn]-g[rOn]>6) tips.push(t("tThrExit",(g[cOn]-g[rOn]).toFixed(0))); }
+  if(!tips.length) tips.push(t("tSmall"));
   return tips;
 }
 
@@ -469,16 +643,15 @@ function recompute(){
   const m=STATE.model; if(!m) return;
   const saved = STATE.useSaved ? getSavedRef(m.meta&&m.meta.TrackName) : null;
   let refP, refTime, refLabel;
-  if(saved && saved.profile){ refP=saved.profile; refTime=saved.lapTime; refLabel="⭐ Bestzeit "+fmtTime(saved.lapTime); }
-  else { refP=lapProfile(m,STATE.refLap); refTime=STATE.refLap?STATE.refLap.lapTime:null; refLabel=STATE.refLap?("R"+(STATE.refLap.index+1)):"—"; }
+  if(saved && saved.profile){ refP=saved.profile; refTime=saved.lapTime; refLabel=t("refStar",fmtTime(saved.lapTime)); }
+  else { refP=lapProfile(m,STATE.refLap); refTime=STATE.refLap?STATE.refLap.lapTime:null; refLabel=STATE.refLap?t("lapN",STATE.refLap.index+1):"—"; }
   STATE.cmpP=lapProfile(m,STATE.cmpLap);
-  if(!refP||!STATE.cmpP){ setStatus("Runde unvollständig"); return; }
+  if(!refP||!STATE.cmpP){ setStatus(t("lapIncomplete")); return; }
   STATE.refP=refP; STATE.refInfo={lapTime:refTime,label:refLabel,saved:!!saved};
   STATE.ana=analyze(refP,STATE.cmpP);
   buildLapTable(); renderKPIs(); renderInsights(); buildCharts(); fillChanSelect(); renderMap(); renderTyres(); redrawAll();
   const single = !saved && STATE.refLap===STATE.cmpLap;
-  document.getElementById("singleLapNote").innerHTML = single
-    ? `<div class="banner">Nur <b>eine vollständige Runde</b> in dieser Aufnahme – für Delta &amp; Zonen brauchst du mind. 2 Runden (oder speichere eine Bestzeit als Referenz). Geschwindigkeit, Gas/Bremse und Streckenkarte werden trotzdem angezeigt.</div>` : "";
+  document.getElementById("singleLapNote").innerHTML = single ? `<div class="banner">${t("singleLap")}</div>` : "";
   renderPit();
 }
 
@@ -487,19 +660,19 @@ function renderKPIs(){
   const diff=c.lapTime-(ri.lapTime||c.lapTime);
   const k=(l,v,d,cls)=>`<div class="stat"><div class="l">${l}</div><div class="v">${v}</div><div class="d ${cls||'muted'}">${d||''}</div></div>`;
   el.innerHTML=[
-    k("Referenz",fmtTime(ri.lapTime),ri.label),
-    k("Vergleichs-Runde",fmtTime(c.lapTime),"R"+(c.index+1)),
-    k("Differenz",fmtDelta(diff)+" s",diff>=0?"langsamer":"schneller",diff>=0?"up":"down"),
-    k("Summe Zeitverlust","+"+a.zones.reduce((x,z)=>x+z.loss,0).toFixed(2)+" s",a.zones.length+" Zonen"),
-    a.fullThrCmp!=null?k("Vollgas-Anteil",a.fullThrCmp.toFixed(0)+" %","Ref "+a.fullThrRef.toFixed(0)+" %"):"",
-    a.coastCmp!=null?k("Segeln (kein Gas/Bremse)",a.coastCmp.toFixed(0)+" %","Ref "+a.coastRef.toFixed(0)+" %",a.coastCmp>a.coastRef?"up":"down"):""
+    k(t("kRef"),fmtTime(ri.lapTime),ri.label),
+    k(t("cmpLap"),fmtTime(c.lapTime),t("lapN",c.index+1)),
+    k(t("kDiff"),fmtDelta(diff)+" s",diff>=0?t("slower"):t("faster"),diff>=0?"up":"down"),
+    k(t("kSumLoss"),"+"+a.zones.reduce((x,z)=>x+z.loss,0).toFixed(2)+" s",t("zonesN",a.zones.length)),
+    a.fullThrCmp!=null?k(t("kFullThr"),a.fullThrCmp.toFixed(0)+" %",t("refPct",a.fullThrRef.toFixed(0))):"",
+    a.coastCmp!=null?k(t("kCoast"),a.coastCmp.toFixed(0)+" %",t("refPct",a.coastRef.toFixed(0)),a.coastCmp>a.coastRef?"up":"down"):""
   ].join("");
 }
 function renderInsights(){
   const a=STATE.ana, el=document.getElementById("insights");
-  document.getElementById("deltaSub").textContent=` · Gesamt ${fmtDelta(a.totalLoss)} s`;
-  if(!a.zones.length){ el.innerHTML='<div class="hint">Keine nennenswerten Verlustzonen – Runden sehr ähnlich oder nur eine Runde vorhanden.</div>'; return; }
-  el.innerHTML=a.zones.slice(0,6).map((z,i)=>`<div class="insight"><div class="badge">+${z.loss.toFixed(2)}s</div><div class="body"><b>Zone ${i+1}: ${z.dStart.toFixed(0)}–${z.dEnd.toFixed(0)} m</b>${z.speedDiff<-1?`<span class="pill cmp">${z.cmpMinSpeed.toFixed(0)} vs ${z.refMinSpeed.toFixed(0)} km/h</span>`:''}<div class="sub">${z.tips.join("<br>")}</div></div></div>`).join("");
+  document.getElementById("deltaSub").textContent=t("deltaSum",fmtDelta(a.totalLoss));
+  if(!a.zones.length){ el.innerHTML=`<div class="hint">${t("noZones")}</div>`; return; }
+  el.innerHTML=a.zones.slice(0,6).map((z,i)=>`<div class="insight"><div class="badge">+${z.loss.toFixed(2)}s</div><div class="body"><b>${t("zoneLbl",i+1,z.dStart.toFixed(0),z.dEnd.toFixed(0))}</b>${z.speedDiff<-1?`<span class="pill cmp">${z.cmpMinSpeed.toFixed(0)} vs ${z.refMinSpeed.toFixed(0)} km/h</span>`:''}<div class="sub">${z.tips.join("<br>")}</div></div></div>`).join("");
 }
 function buildCharts(){
   CHARTS.length=0; const refP=STATE.refP,cmpP=STATE.cmpP,a=STATE.ana,L=refP.L;
@@ -537,8 +710,8 @@ function renderChanPlot(){ plot(document.getElementById("cChan"),{xmax:STATE.ref
 function renderMap(){
   const cv=document.getElementById("cMap"),{ctx,w,h}=fitCanvas(cv); ctx.clearRect(0,0,w,h);
   const p=STATE.refP, hint=document.getElementById("mapHint");
-  if(!p.lat||!p.lon){ hint.textContent="Keine GPS-Koordinaten in dieser Aufnahme – Streckenkarte nicht verfügbar."; ctx.fillStyle="#6b7686";ctx.font="13px Segoe UI";ctx.fillText("Keine GPS-Daten.",20,30); cv._geom=null; return; }
-  hint.textContent="Linie = Referenzrunde. Magenta-Punkte markieren die größten Zeitverlust-Zonen.";
+  if(!p.lat||!p.lon){ hint.textContent=t("noGps"); ctx.fillStyle="#6b7686";ctx.font="13px Segoe UI";ctx.fillText(t("noGpsShort"),20,30); cv._geom=null; return; }
+  hint.textContent=t("mapLegend");
   const N=p.lat.length, lat0=p.lat[N>>1]*Math.PI/180;
   const X=new Float64Array(N),Y=new Float64Array(N);
   for(let i=0;i<N;i++){ X[i]=p.lon[i]*Math.cos(lat0); Y[i]=p.lat[i]; }
@@ -561,7 +734,7 @@ function speedColor(t){ t=Math.max(0,Math.min(1,t));
 /* ---------- Sessions / Runden UI ---------- */
 function renderMeta(){
   const m=STATE.model.meta||{}, el=document.getElementById("metaCard");
-  const rows=[["Strecke",m.TrackName],["Fahrzeug",m.CarName],["Klasse",m.CarClass],["Session",m.SessionType],["Wetter",m.WeatherConditions],["Fahrer",m.DriverName],["Aufnahme",(m.RecordingTime||"").replace("T"," ").replace("Z","").replace(/_/g,":")]];
+  const rows=[[t("mTrack"),m.TrackName],[t("mVehicle"),m.CarName],[t("mClass"),m.CarClass],[t("mSession"),m.SessionType],[t("mWeather"),m.WeatherConditions],[t("mDriver"),m.DriverName],[t("mRecording"),(m.RecordingTime||"").replace("T"," ").replace("Z","").replace(/_/g,":")]];
   el.innerHTML='<div class="meta-grid">'+rows.filter(r=>r[1]).map(r=>`<div class="k">${r[0]}</div><div>${escapeHtml(r[1])}</div>`).join("")+'</div>';
 }
 function buildSessionSelect(){
@@ -573,7 +746,7 @@ function prettyName(f){ return f.replace(/\.duckdb$/i,"").replace(/_([A-Z])_/," 
 function buildLapTable(){
   const m=STATE.model, laps=m.laps;
   const best=bestLap(laps);
-  const opt=l=>`<option value="${l.index}">R${l.index+1} · ${fmtTime(l.lapTime)}${l.outlap?" (Out)":""}${l.inlap?" (In)":""}${!l.complete?" ⚠":""}</option>`;
+  const opt=l=>`<option value="${l.index}">${t("lapN",l.index+1)} · ${fmtTime(l.lapTime)}${l.outlap?" (Out)":""}${l.inlap?" (In)":""}${!l.complete?" ⚠":""}</option>`;
   const refSel=document.getElementById("refSel"),cmpSel=document.getElementById("cmpSel");
   refSel.innerHTML=laps.map(opt).join(""); cmpSel.innerHTML=laps.map(opt).join("");
   refSel.value=STATE.refLap.index; cmpSel.value=STATE.cmpLap.index;
@@ -595,7 +768,7 @@ function computeTopSpeeds(m){ const cs=m.cSpeed; if(!cs)return; const f=speedToK
 /* ---------- Laden ---------- */
 async function loadSession(file){
   try{
-    setStatus("Lade "+file+" …");
+    setStatus(t("loadingFile",file));
     const js=await apiGet("/api/session?file="+encodeURIComponent(file));
     const m=buildModel(js);
     if(m.error){ showConn(`<div class="banner err">${m.error}</div>`); }
@@ -611,11 +784,11 @@ async function loadSession(file){
     renderMeta(); renderDiag(); document.getElementById("app").style.display="";
     if(!m.error) showConn("");
     recompute();
-    setStatus(`Geladen: ${m.laps.length} Runden · ${m.laps.filter(l=>l.complete).length} vollständig`);
+    setStatus(t("loaded", m.laps.length, m.laps.filter(l=>l.complete).length));
     return "ok";
   }catch(e){
-    if(e.code===423){ setStatus("⏺ Aufnahme läuft – warte auf Abschluss…"); return "locked"; }
-    showConn(`<div class="banner err">Fehler beim Laden: ${escapeHtml(e.message)}</div>`); setStatus("Fehler: "+e.message); return "error";
+    if(e.code===423){ setStatus(t("recActive")); return "locked"; }
+    showConn(`<div class="banner err">${t("errLoad",escapeHtml(e.message))}</div>`); setStatus(t("errPrefix",e.message)); return "error";
   }
 }
 
@@ -645,26 +818,26 @@ async function followLive(){
   }
 }
 function showRecordingBanner(newest){
-  const t=new Date(newest.mtime).toLocaleTimeString("de-DE");
-  showConn(`<div class="banner">⏺ <b>Aufnahme läuft gerade</b> (${escapeHtml(prettyName(newest.file))}, ${t}) – die Datei ist noch gesperrt. Angezeigt wird deine <b>letzte abgeschlossene Session</b>. Sobald du den Stint beendest oder in die Box fährst, lädt die App die neue Aufnahme automatisch.</div>`);
+  const tm=new Date(newest.mtime).toLocaleTimeString(LANG==="en"?"en-GB":"de-DE");
+  showConn(`<div class="banner">${t("recBanner",escapeHtml(prettyName(newest.file)),tm)}</div>`);
 }
 function showConn(html){ document.getElementById("conn").innerHTML=html||""; }
 function showBridgeHelp(info){
   document.getElementById("app").style.display="none";
-  let h='<div class="banner err"><b>Bridge nicht erreichbar oder keine Aufnahmen gefunden.</b><br>';
-  if(info.offline) h+=`Die App läuft, aber die Bridge antwortet nicht (${escapeHtml(info.msg||"")}). Starte sie über <b>Start LMU Telemetrie.cmd</b> und öffne dann <code>http://localhost:8777</code>.`;
-  else if(info.empty) h+=`Bridge läuft ✓, aber im Ordner <span class="mono">${escapeHtml(info.telDir||"")}</span> liegt noch keine <code>.duckdb</code>-Aufnahme. Aktiviere in LMU die Telemetrie-Aufzeichnung und fahre einen Stint.`;
-  else h+=escapeHtml(info.error||"Unbekannt");
+  let h=`<div class="banner err"><b>${t("helpTitle")}</b><br>`;
+  if(info.offline) h+=t("helpOffline",escapeHtml(info.msg||""));
+  else if(info.empty) h+=t("helpEmpty",escapeHtml(info.telDir||""));
+  else h+=escapeHtml(info.error||"?");
   h+='</div>';
-  showConn(h); setStatus("Warte auf Aufnahmen…");
+  showConn(h); setStatus(t("waitingRec"));
 }
-function setLive(on){ STATE.follow=on; document.getElementById("liveToggle").classList.toggle("on",on); document.getElementById("liveLabel").textContent=on?"Live":"Manuell"; }
+function setLive(on){ STATE.follow=on; document.getElementById("liveToggle").classList.toggle("on",on); document.getElementById("liveLabel").textContent=on?t("live"):t("manual"); }
 document.getElementById("liveToggle").onclick=()=>{ setLive(!STATE.follow); if(STATE.follow&&STATE.sessions[0]) loadSession(STATE.sessions[0].file); };
 document.getElementById("btnReload").onclick=()=>{ if(STATE.loadedKey) loadSession(STATE.loadedKey); else poll(); };
 
 function renderDiag(){
   const m=STATE.model;
-  document.getElementById("diagConn").innerHTML=`Bridge: <span class="ok">verbunden</span> · Ordner: <span class="mono">${escapeHtml(STATE.telDir||"")}</span><br>Datei: <b>${escapeHtml(m.fileName)}</b> · Kanal-Startzeit: ${(m.channelStartTs||0).toFixed(2)} s · Strecke ${m.trackLen?.toFixed(0)} m`;
+  document.getElementById("diagConn").innerHTML=t("diagConn",escapeHtml(STATE.telDir||""),escapeHtml(m.fileName),(m.channelStartTs||0).toFixed(2),(m.trackLen||0).toFixed(0));
   document.getElementById("chanCount").textContent=m.channels.length;
   const tb=document.querySelector("#diagChans tbody");
   tb.innerHTML=m.channels.map(c=>{ let mn=Infinity,mx=-Infinity; for(let k=0;k<c.nData;k++){const v=c.data[k];if(v<mn)mn=v;if(v>mx)mx=v;} return `<tr><td>${escapeHtml(c.name)}${c.synth?' <span class="pill">synth</span>':''}</td><td>${escapeHtml(c.unit)}</td><td>${c.freq}</td><td>${c.nData}</td><td>${isFinite(mn)?mn.toFixed(2):"—"}</td><td>${isFinite(mx)?mx.toFixed(2):"—"}</td></tr>`; }).join("");
@@ -705,17 +878,17 @@ function saveBestRef(){
     meta:{car:m.meta.CarName,date:m.meta.RecordingTime,file:m.fileName} };
   lsSet(refKey(m.meta.TrackName),rec);
   STATE.useSaved=true; refreshRefSrc(); recompute();
-  setStatus("Bestzeit-Referenz gespeichert: "+fmtTime(STATE.refLap.lapTime)+" · "+(m.meta.TrackName||""));
+  setStatus(t("bestSaved",fmtTime(STATE.refLap.lapTime),(m.meta.TrackName||"")));
 }
 function refreshRefSrc(){
   const m=STATE.model, sel=document.getElementById("refSrcSel"); if(!m||!sel)return;
   const saved=getSavedRef(m.meta&&m.meta.TrackName);
-  const opts=['<option value="session">Beste Runde dieser Session</option>'];
-  if(saved) opts.push(`<option value="saved">⭐ Bestzeit ${fmtTime(saved.lapTime)} (${escapeHtml(((saved.meta&&saved.meta.date)||"").slice(0,10))})</option>`);
+  const opts=[`<option value="session">${t("sessionBest")}</option>`];
+  if(saved) opts.push(`<option value="saved">${t("bestRefOpt",fmtTime(saved.lapTime),escapeHtml(((saved.meta&&saved.meta.date)||"").slice(0,10)))}</option>`);
   sel.innerHTML=opts.join("");
   if(!saved) STATE.useSaved=false;
   sel.value=STATE.useSaved?"saved":"session";
-  document.getElementById("btnSaveRef").textContent = saved? ("📌 Bestzeit aktualisieren ("+fmtTime(saved.lapTime)+")") : "📌 Diese Runde als Bestzeit speichern";
+  document.getElementById("btnSaveRef").textContent = saved? t("saveRefUpdate",fmtTime(saved.lapTime)) : t("saveRef");
 }
 
 /* ---------- Boxenstopp- & Energie-Rechner ---------- */
@@ -728,7 +901,9 @@ function pitPrefill(m){
   document.getElementById("piVE").value = m.vePerLap!=null? m.vePerLap.toFixed(2):"";
   document.getElementById("piFuel").value = m.fuelPerLap!=null? m.fuelPerLap.toFixed(1):"";
   document.getElementById("piWear").value = m.wearPerLap!=null? m.wearPerLap.toFixed(2):"";
-  document.getElementById("piTeleNote").innerHTML=`Aus Telemetrie · <b>${escapeHtml(m.meta.TrackName||"")}</b> · Ø Runde <b>${fmtTime(m.avgLap)}</b> · Bestzeit ${fmtTime(m.bestLap)} · VE ${m.vePerLap!=null?m.vePerLap.toFixed(2)+" %/Rd":"—"} · Sprit ${m.fuelPerLap!=null?m.fuelPerLap.toFixed(1)+" L/Rd":"—"} · Verschleiß ${m.wearPerLap!=null?m.wearPerLap.toFixed(2)+" %/Rd":"—"}. Tipp: trage für die Planung deine erwartete <b>Renn-Pace</b> ein (nicht die Outlap).`;
+  const pl = LANG==="en"?"/lap":"/Rd";
+  const veS = m.vePerLap!=null?m.vePerLap.toFixed(2)+" %"+pl:"—", fuS = m.fuelPerLap!=null?m.fuelPerLap.toFixed(1)+" L"+pl:"—", wS = m.wearPerLap!=null?m.wearPerLap.toFixed(2)+" %"+pl:"—";
+  document.getElementById("piTeleNote").innerHTML=t("teleNote",escapeHtml(m.meta.TrackName||""),fmtTime(m.avgLap),fmtTime(m.bestLap),veS,fuS,wS);
 }
 function renderPit(){
   const m=STATE.model, head=document.getElementById("piHead"); if(!m||!head)return;
@@ -743,7 +918,7 @@ function renderPit(){
   const wearPerLap=parseFloat(document.getElementById("piWear").value)||null;
   const tyreLapsMax = wearPerLap? Math.max(1,Math.floor(100/wearPerLap)) : Infinity;   // Runden bis Reifen runter
   const tb=document.querySelector("#piTable tbody"), plan=document.getElementById("piDriverPlan");
-  if(!avgLap||avgLap<10||!raceMin){ head.innerHTML='<div class="hint">Bitte Rennlänge (Minuten) und Ø Rundenzeit angeben.</div>'; tb.innerHTML=""; plan.innerHTML=""; return; }
+  if(!avgLap||avgLap<10||!raceMin){ head.innerHTML=`<div class="hint">${t("pitFill")}</div>`; tb.innerHTML=""; plan.innerHTML=""; return; }
   const raceSec=raceMin*60, totalLaps=Math.ceil(raceSec/avgLap), veTank=100;
   const lapsPush = vePerLap? Math.max(1,Math.floor(veTank/vePerLap)) : totalLaps;
   const Senergy = Math.max(1, Math.ceil(totalLaps/lapsPush));
@@ -763,20 +938,20 @@ function renderPit(){
   }
   let best=null; rows.forEach(r=>{ if(r.feasible&&(!best||r.totalTime<best.totalTime))best=r; });
   tb.innerHTML=rows.map(r=>`<tr class="${r===best?'fastest':''}${!r.feasible?' invalid':''}"><td>${r.stops}</td><td>${r.S}</td><td>${r.lapsPerStint}</td><td>${r.stintMin.toFixed(0)}</td><td>${r.veTarget!=null?r.veTarget.toFixed(2):'—'}</td><td>${r.savePct>0.3?'+'+r.savePct.toFixed(0)+'%':(r.savePct<-0.3?r.savePct.toFixed(0)+'%':'0')}</td><td>${r.fuelStint!=null?r.fuelStint.toFixed(1):'—'}</td><td>${fmtClock(r.totalTime)}</td><td>${r.feasible?'✓':'⚠'}</td></tr>`).join("");
-  if(!best){ head.innerHTML='<div class="hint">Keine machbare Strategie – Energie-Sparen wäre zu groß. Erhöhe die VE/Runde-Annahme oder die Stopps.</div>'; plan.innerHTML=""; return; }
+  if(!best){ head.innerHTML=`<div class="hint">${t("pitNoStrat")}</div>`; plan.innerHTML=""; return; }
   const reused=Math.max(0,best.S-tyres);
-  const tyreTxt=`${Math.min(best.S,tyres)} Satz/Sätze frisch${reused>0?` · ${reused} Stint(s) auf gebrauchten Reifen (nur ${tyres} Sätze vorhanden)`:''}`;
-  head.innerHTML=`<div style="font-size:16px;margin-bottom:8px"><b>${best.stops} Boxenstopp${best.stops===1?'':'s'}</b> · ${best.S} Stints · <b>${best.lapsPerStint} Runden/Stint</b> (~${best.stintMin.toFixed(0)} min)</div>
+  const tyreTxt=t("tyreFresh",Math.min(best.S,tyres))+(reused>0?t("tyreReused",reused,tyres):'');
+  head.innerHTML=`<div style="font-size:16px;margin-bottom:8px"><b>${t("pitStops",best.stops)}</b> · ${t("pitStints",best.S,best.lapsPerStint,best.stintMin.toFixed(0))}</div>
     <div class="grid2">
-      ${pitKpi("Virtual Energy / Runde", best.veTarget!=null?best.veTarget.toFixed(2)+" %":"—", best.savePct>0.5?("≈ "+best.savePct.toFixed(0)+" % sparen (Lift&Coast)"):(best.savePct<-0.5?"Energie reicht – pushen":"genau passend"), best.savePct>0.5?"up":"down")}
-      ${pitKpi("Sprit / Stint", best.fuelStint!=null?best.fuelStint.toFixed(1)+" L":"—","Rennen gesamt "+(fuelPerLap?(fuelPerLap*totalLaps).toFixed(0)+" L":"—"))}
-      ${pitKpi("Renndistanz", totalLaps+" Runden","reine Fahrzeit ~"+fmtClock(totalLaps*avgLap))}
-      ${pitKpi("Geschätzte Gesamtzeit", fmtClock(best.totalTime), best.stops+" Stopp(s) × "+pitLoss+" s")}
+      ${pitKpi(t("veRunde"), best.veTarget!=null?best.veTarget.toFixed(2)+" %":"—", best.savePct>0.5?t("veSave",best.savePct.toFixed(0)):(best.savePct<-0.5?t("veEnough"):t("veExact")), best.savePct>0.5?"up":"down")}
+      ${pitKpi(t("fuelStint"), best.fuelStint!=null?best.fuelStint.toFixed(1)+" L":"—",t("fuelTotal",(fuelPerLap?(fuelPerLap*totalLaps).toFixed(0)+" L":"—")))}
+      ${pitKpi(t("raceDist"), t("lapsN",totalLaps),t("driveTime",fmtClock(totalLaps*avgLap)))}
+      ${pitKpi(t("estTotal"), fmtClock(best.totalTime), t("stopsXs",best.stops,pitLoss))}
     </div>
-    <div class="hint" style="margin-top:8px">Reifen: ${tyreTxt}${isFinite(tyreLapsMax)?` · halten ~<b>${tyreLapsMax}</b> Rd/Stint (${wearPerLap.toFixed(2)} %/Rd) – begrenzt die Stintlänge`:''}.<br>„Schnellste Gesamtzeit" = wenigste Stopps, bei denen Energie-Sparen (≤ ${PIT_MAXSAVE} %) <b>und</b> Reifen mitspielen; Sparen kostet hier ${pen} s/Runde je %.</div>`;
+    <div class="hint" style="margin-top:8px">${t("tyresLbl")} ${tyreTxt}${isFinite(tyreLapsMax)?t("tyreLast",tyreLapsMax,wearPerLap.toFixed(2)):''}.<br>${t("pitExplain",PIT_MAXSAVE,pen)}</div>`;
   const D=drivers,S=best.S, baseS=Math.floor(S/D), extra=S%D; let html='';
-  for(let d=0;d<D;d++){ const st=baseS+(d<extra?1:0); html+=`<div class="stat"><div class="l">Fahrer ${d+1}</div><div class="v">${st} Stint${st===1?'':'s'}</div><div class="d muted">~${(st*best.stintMin).toFixed(0)} min · ~${st*best.lapsPerStint} Runden</div></div>`; }
-  plan.innerHTML='<div class="grid2">'+html+'</div>'+(S<D?`<div class="hint" style="margin-top:8px">Mehr Fahrer (${D}) als Stints (${S}) – nicht jeder kommt zum Einsatz.</div>`:'');
+  for(let d=0;d<D;d++){ const st=baseS+(d<extra?1:0); html+=`<div class="stat"><div class="l">${t("driverK",d+1)}</div><div class="v">${t("stintsN",st)}</div><div class="d muted">${t("driverInfo",(st*best.stintMin).toFixed(0),st*best.lapsPerStint)}</div></div>`; }
+  plan.innerHTML='<div class="grid2">'+html+'</div>'+(S<D?`<div class="hint" style="margin-top:8px">${t("moreDrivers",D,S)}</div>`:'');
 }
 // Eingaben verdrahten
 ["piRace","piTyres","piDrivers","piPit","piLap","piVE","piFuel","piWear","piPenalty"].forEach(id=>{ const e=document.getElementById(id); if(e) e.addEventListener("input",renderPit); });
@@ -788,20 +963,20 @@ function tempColor(t){ if(t==null)return "#33405a"; if(t<70)return "#5aa0e6"; if
 function avgT(arr){ const v=arr.filter(x=>x).map(x=>x.avg); return v.length? v.reduce((a,b)=>a+b,0)/v.length : null; }
 function renderTyres(){
   const m=STATE.model, lap=STATE.cmpLap; if(!m||!lap) return;
-  document.getElementById("tyLapNote").textContent="· R"+(lap.index+1)+" ("+fmtTime(lap.lapTime)+")";
+  document.getElementById("tyLapNote").textContent="· "+t("lapN",lap.index+1)+" ("+fmtTime(lap.lapTime)+")";
   const W=m.wheels||{};
   const wear=wheelStats(W["Tyres Wear"],lap.t0,lap.t1), press=wheelStats(W["TyresPressure"],lap.t0,lap.t1);
   const tc=wheelStats(W["TyresTempCentre"],lap.t0,lap.t1), tl=wheelStats(W["TyresTempLeft"],lap.t0,lap.t1), tr=wheelStats(W["TyresTempRight"],lap.t0,lap.t1);
   const grid=document.getElementById("tyreWheels");
-  if(!tc){ grid.innerHTML='<div class="hint">Keine Reifen-Temperatur-Kanäle in dieser Aufnahme.</div>'; document.getElementById("tyreTips").innerHTML=""; renderBrakes(); renderWearSession(); return; }
+  if(!tc){ grid.innerHTML=`<div class="hint">${t("noTyreTemp")}</div>`; document.getElementById("tyreTips").innerHTML=""; renderBrakes(); renderWearSession(); return; }
   let html="";
   for(let k=0;k<4;k++){
     const c=tc[k]&&tc[k].avg, l=tl[k]&&tl[k].avg, r=tr[k]&&tr[k].avg, p=press&&press[k]&&press[k].avg, wr=wear&&wear[k]&&wear[k].min;
     const bar = wr!=null? `<div class="wbar"><i style="width:${Math.max(0,Math.min(100,wr))}%;background:${wr>60?'#3fb950':wr>35?'#d29922':'#f85149'}"></i></div>`:"";
-    html+=`<div class="wheel"><div class="wl">${WHEEL_LABELS[k]}</div>
+    html+=`<div class="wheel"><div class="wl">${WL(k)}</div>
       <div class="temp3"><span style="background:${tempColor(l)}">${l!=null?l.toFixed(0):'–'}°</span><span style="background:${tempColor(c)}">${c!=null?c.toFixed(0):'–'}°</span><span style="background:${tempColor(r)}">${r!=null?r.toFixed(0):'–'}°</span></div>
-      <div class="r2"><span class="muted">Druck</span><b>${p!=null?(p/100).toFixed(2)+' bar':'–'}</b></div>
-      <div class="r2"><span class="muted">Rest-Profil</span><b>${wr!=null?wr.toFixed(1)+' %':'–'}</b></div>${bar}</div>`;
+      <div class="r2"><span class="muted">${t("pressure")}</span><b>${p!=null?(p/100).toFixed(2)+' bar':'–'}</b></div>
+      <div class="r2"><span class="muted">${t("restProfile")}</span><b>${wr!=null?wr.toFixed(1)+' %':'–'}</b></div>${bar}</div>`;
   }
   grid.innerHTML=html;
   renderTyreTips(tc,tl,tr); renderBrakes(); renderWearSession();
@@ -814,50 +989,55 @@ function renderTyreTips(tc,tl,tr){
     const [ai,ao]=innerOuter(tl,tr,k);
     if(ai!=null&&ao!=null){
       const dCenter=c-(ai+ao)/2;
-      if(dCenter>6) tips.push(`<b>${WHEEL_LABELS[k]}</b>: Mitte ${dCenter.toFixed(0)} °C heißer als die Kanten → <b>Reifendruck zu hoch</b>.`);
-      else if(dCenter<-6) tips.push(`<b>${WHEEL_LABELS[k]}</b>: Mitte ${(-dCenter).toFixed(0)} °C kühler als die Kanten → <b>Reifendruck zu niedrig</b>.`);
+      if(dCenter>6) tips.push(t("tPressHigh",WL(k),dCenter.toFixed(0)));
+      else if(dCenter<-6) tips.push(t("tPressLow",WL(k),(-dCenter).toFixed(0)));
       const dCam=ao-ai;
-      if(dCam>6) tips.push(`<b>${WHEEL_LABELS[k]}</b>: Außenkante ${dCam.toFixed(0)} °C heißer als innen → <b>mehr negativen Sturz</b> wählen.`);
-      else if(dCam<-12) tips.push(`<b>${WHEEL_LABELS[k]}</b>: Innenkante ${(-dCam).toFixed(0)} °C heißer → evtl. <b>zu viel Sturz</b>.`);
+      if(dCam>6) tips.push(t("tCamberOut",WL(k),dCam.toFixed(0)));
+      else if(dCam<-12) tips.push(t("tCamberIn",WL(k),(-dCam).toFixed(0)));
     }
   }
   const favg=avgT([tc[0],tc[1]]), ravg=avgT([tc[2],tc[3]]);
   if(favg!=null&&ravg!=null){ const d=favg-ravg;
-    if(d>8) tips.push(`<b>Balance:</b> Vorderreifen ${d.toFixed(0)} °C heißer → Tendenz <b>Untersteuern</b> (Front überlastet): Front-ARB weicher / mehr Frontflügel / Heck-ARB härter.`);
-    else if(d<-8) tips.push(`<b>Balance:</b> Hinterreifen ${(-d).toFixed(0)} °C heißer → Tendenz <b>Übersteuern</b> (Heck überlastet): mehr Heckflügel / Heck-ARB weicher / Traktion erhöhen.`);
+    if(d>8) tips.push(t("balUnder",d.toFixed(0)));
+    else if(d<-8) tips.push(t("balOver",(-d).toFixed(0)));
   }
   const all=avgT([tc[0],tc[1],tc[2],tc[3]]);
-  if(all!=null&&all<65) tips.push(`Reifen insgesamt <b>kalt</b> (Ø ${all.toFixed(0)} °C) – evtl. nur Outlap; im Renntrimm steigen sie. Sonst Druck erhöhen / wärmer fahren.`);
+  if(all!=null&&all<65) tips.push(t("tyresCold",all.toFixed(0)));
   const el=document.getElementById("tyreTips");
-  el.innerHTML = tips.length? tips.map(t=>`<div class="insight" style="background:var(--panel2)"><div class="body"><div class="sub">${t}</div></div></div>`).join("") : '<div class="hint">Reifentemperaturen unauffällig (oder Datenbasis zu klein, z. B. nur Outlap).</div>';
+  el.innerHTML = tips.length? tips.map(x=>`<div class="insight" style="background:var(--panel2)"><div class="body"><div class="sub">${x}</div></div></div>`).join("") : `<div class="hint">${t("noTyreData")}</div>`;
 }
 function renderBrakes(){
   const m=STATE.model,lap=STATE.cmpLap, bt=wheelStats((m.wheels||{})["Brakes Temp"],lap.t0,lap.t1);
   const grid=document.getElementById("brakeWheels");
-  if(!bt){ grid.innerHTML='<div class="hint">Keine Bremstemperatur-Daten.</div>'; return; }
+  if(!bt){ grid.innerHTML=`<div class="hint">${t("noBrakeTemp")}</div>`; return; }
   grid.innerHTML=[0,1,2,3].map(k=>{ const a=bt[k],v=a&&a.avg,mx=a&&a.max,col=v==null?"#33405a":v<150?"#5aa0e6":v<500?"#3fb950":v<650?"#d29922":"#f85149";
-    return `<div class="wheel"><div class="wl">${WHEEL_LABELS[k]}</div><div class="r2"><span class="muted">Ø</span><b style="color:${col}">${v!=null?v.toFixed(0)+' °C':'–'}</b></div><div class="r2"><span class="muted">Max</span><b>${mx!=null?mx.toFixed(0)+' °C':'–'}</b></div></div>`; }).join("");
+    return `<div class="wheel"><div class="wl">${WL(k)}</div><div class="r2"><span class="muted">${t("brAvg")}</span><b style="color:${col}">${v!=null?v.toFixed(0)+' °C':'–'}</b></div><div class="r2"><span class="muted">${t("brMax")}</span><b>${mx!=null?mx.toFixed(0)+' °C':'–'}</b></div></div>`; }).join("");
 }
 function renderWearSession(){
   const m=STATE.model, ww=(m.wheels||{})["Tyres Wear"], el=document.getElementById("wearSession");
-  if(!ww){ el.innerHTML='<div class="hint">Keine Verschleißdaten.</div>'; return; }
+  if(!ww){ el.innerHTML=`<div class="hint">${t("noWearData")}</div>`; return; }
   const sT=m.laps.length?m.laps[0].t0:0, eT=m.laps.length?m.laps[m.laps.length-1].t1:0;
   const s=wheelVal(ww,sT), e=wheelVal(ww,eT);
   let html='<div class="grid2">';
   for(let k=0;k<4;k++){ const used=(s&&e)?(s[k]-e[k]):null;
-    html+=`<div class="stat"><div class="l">${WHEEL_LABELS[k]} Rest</div><div class="v">${e?e[k].toFixed(1)+' %':'–'}</div><div class="d muted">${used!=null?used.toFixed(1)+' % verbraucht':''}</div></div>`; }
-  html+='</div><div class="hint" style="margin-top:8px">Ø Verschleiß (schlechtestes Rad): <b>'+(m.wearPerLap!=null?m.wearPerLap.toFixed(2)+' %/Runde':'—')+'</b>'+(m.wearPerLap?` → Reifen halten ~<b>${Math.floor(100/m.wearPerLap)}</b> Runden.`:'')+'</div>';
+    html+=`<div class="stat"><div class="l">${t("wRest",WL(k))}</div><div class="v">${e?e[k].toFixed(1)+' %':'–'}</div><div class="d muted">${used!=null?t("usedPct",used.toFixed(1)):''}</div></div>`; }
+  const worstStr = m.wearPerLap!=null? m.wearPerLap.toFixed(2)+(LANG==="en"?" %/lap":" %/Runde"):"—";
+  const holdStr = m.wearPerLap? t("holdLaps",Math.floor(100/m.wearPerLap)):"";
+  html+='</div><div class="hint" style="margin-top:8px">'+t("wearWorst","<b>"+worstStr+"</b>",holdStr)+'</div>';
   el.innerHTML=html;
 }
 
 /* ---------- Setup-Vergleich & -Hinweise ---------- */
 const SETUP_LABELS={VM_FRONT_WING:"Frontflügel",VM_REAR_WING:"Heckflügel",VM_BRAKE_BALANCE:"Bremsbalance",VM_BRAKE_PRESSURE:"Bremsdruck",VM_BRAKE_MIGRATION:"Brake Migration",VM_BRAKE_DUCTS:"Bremskühlung vorn",VM_BRAKE_DUCTS_REAR:"Bremskühlung hinten",VM_FRONT_ANTISWAY:"ARB vorne",VM_REAR_ANTISWAY:"ARB hinten",VM_DIFF_POWER:"Diff Power",VM_DIFF_COAST:"Diff Coast",VM_DIFF_PRELOAD:"Diff Vorspannung",VM_ENGINE_MIXTURE:"Gemisch",VM_ENGINE_BRAKEMAP:"Motorbremse",VM_ENGINE_BOOST:"Boost",VM_REGEN_LEVEL:"Rekuperation",VM_TORQUE_SPLIT:"Drehmoment-Split",VM_TRACTION_CONTROL:"Traktionskontrolle",VM_TRACTIONCONTROLMAP:"TC Map",VM_FRONT_TOEIN:"Vorspur vorne",VM_REAR_TOEIN:"Vorspur hinten",VM_STEER_LOCK:"Lenkeinschlag",VM_WEIGHT_DISTRIB:"Gewichtsverteilung",VM_FUEL_LEVEL:"Tankfüllung",VM_VIRTUAL_ENERGY:"Virtual Energy (Start)",VM_FRONT_TIRE_COMPOUND:"Reifenmischung vorne",VM_REAR_TIRE_COMPOUND:"Reifenmischung hinten",VM_FRONT_WHEEL_TRACK:"Spurweite vorne",VM_REAR_WHEEL_TRACK:"Spurweite hinten"};
 const WM_T={PRESSURE:"Reifendruck",CAMBER:"Sturz",SPRING:"Feder",RIDEHEIGHT:"Bodenfreiheit",SLOWBUMP:"Dämpfer Druck (slow)",SLOWREBOUND:"Dämpfer Zug (slow)",FASTBUMP:"Dämpfer Druck (fast)",FASTREBOUND:"Dämpfer Zug (fast)",PACKERS:"Packer",COMPOUND:"Mischung",BRAKEDISC:"Bremsscheibe",BRAKEPAD:"Bremsbelag",TENDERSPRING:"Hilfsfeder"};
-const WM_W={FL:"VL",FR:"VR",RL:"HL",RR:"HR"};
-function setupLabel(k){ if(SETUP_LABELS[k])return SETUP_LABELS[k];
-  const m=k.match(/^WM_([A-Z]+)-W_(FL|FR|RL|RR)$/); if(m) return (WM_T[m[1]]||m[1])+" "+WM_W[m[2]];
-  const g=k.match(/^VM_GEAR_(\d+)$/); if(g) return g[1]+". Gang";
-  const c=k.match(/^VM_CHASSIS_ADJ_(\d+)$/); if(c) return "Chassis-Einstellung "+(+c[1]+1);
+const SETUP_LABELS_EN={VM_FRONT_WING:"Front wing",VM_REAR_WING:"Rear wing",VM_BRAKE_BALANCE:"Brake balance",VM_BRAKE_PRESSURE:"Brake pressure",VM_BRAKE_MIGRATION:"Brake migration",VM_BRAKE_DUCTS:"Brake ducts front",VM_BRAKE_DUCTS_REAR:"Brake ducts rear",VM_FRONT_ANTISWAY:"ARB front",VM_REAR_ANTISWAY:"ARB rear",VM_DIFF_POWER:"Diff power",VM_DIFF_COAST:"Diff coast",VM_DIFF_PRELOAD:"Diff preload",VM_ENGINE_MIXTURE:"Mixture",VM_ENGINE_BRAKEMAP:"Engine brake",VM_ENGINE_BOOST:"Boost",VM_REGEN_LEVEL:"Regen",VM_TORQUE_SPLIT:"Torque split",VM_TRACTION_CONTROL:"Traction control",VM_TRACTIONCONTROLMAP:"TC map",VM_FRONT_TOEIN:"Toe front",VM_REAR_TOEIN:"Toe rear",VM_STEER_LOCK:"Steering lock",VM_WEIGHT_DISTRIB:"Weight distribution",VM_FUEL_LEVEL:"Fuel level",VM_VIRTUAL_ENERGY:"Virtual energy (start)",VM_FRONT_TIRE_COMPOUND:"Tyre compound front",VM_REAR_TIRE_COMPOUND:"Tyre compound rear",VM_FRONT_WHEEL_TRACK:"Track width front",VM_REAR_WHEEL_TRACK:"Track width rear"};
+const WM_T_EN={PRESSURE:"Tyre pressure",CAMBER:"Camber",SPRING:"Spring",RIDEHEIGHT:"Ride height",SLOWBUMP:"Damper bump (slow)",SLOWREBOUND:"Damper rebound (slow)",FASTBUMP:"Damper bump (fast)",FASTREBOUND:"Damper rebound (fast)",PACKERS:"Packers",COMPOUND:"Compound",BRAKEDISC:"Brake disc",BRAKEPAD:"Brake pad",TENDERSPRING:"Tender spring"};
+const WIDX={FL:0,FR:1,RL:2,RR:3};
+function setupLabel(k){ const en=LANG==="en"; const SL=en?SETUP_LABELS_EN:SETUP_LABELS, WT=en?WM_T_EN:WM_T;
+  if(SL[k])return SL[k];
+  const m=k.match(/^WM_([A-Z]+)-W_(FL|FR|RL|RR)$/); if(m) return (WT[m[1]]||m[1])+" "+WL(WIDX[m[2]]);
+  const g=k.match(/^VM_GEAR_(\d+)$/); if(g) return en?("Gear "+g[1]):(g[1]+". Gang");
+  const c=k.match(/^VM_CHASSIS_ADJ_(\d+)$/); if(c) return (en?"Chassis adj ":"Chassis-Einstellung ")+(+c[1]+1);
   return k.replace(/^VM_|^WM_/,"").replace(/_/g," ").toLowerCase(); }
 function countSetupChanges(a,b){ if(!a||!b)return 0; let n=0; new Set([...Object.keys(a),...Object.keys(b)]).forEach(k=>{ if(a[k]!==b[k])n++; }); return n; }
 async function recordSetupHistory(m){
@@ -874,7 +1054,7 @@ function renderSetup(){
   const m=STATE.model; if(!m)return;
   const hist=setupHistoryFor(m).sort((a,b)=>(a.date||"").localeCompare(b.date||""));
   const selA=document.getElementById("setupSelA"), selB=document.getElementById("setupSelB");
-  if(hist.length<2){ document.getElementById("setupPace").innerHTML=`<div class="hint">Es ist erst <b>${hist.length}</b> Session für ${escapeHtml((m.meta&&m.meta.CarName)||"")} auf dieser Strecke gemerkt. Sobald du mit <b>geändertem Setup</b> eine weitere Session fährst, kannst du hier den Pace-Effekt sehen.</div>`; selA.innerHTML=selB.innerHTML=""; document.getElementById("setupDiff").innerHTML=""; renderSetupHints(); return; }
+  if(hist.length<2){ document.getElementById("setupPace").innerHTML=`<div class="hint">${t("setupNeed",hist.length,escapeHtml((m.meta&&m.meta.CarName)||""))}</div>`; selA.innerHTML=selB.innerHTML=""; document.getElementById("setupDiff").innerHTML=""; renderSetupHints(); return; }
   const opt=h=>`<option value="${escapeHtml(h.file)}">${fmtTime(h.bestLap)} · ${escapeHtml((h.date||"").slice(0,16).replace("T"," "))}</option>`;
   selA.innerHTML=hist.map(opt).join(""); selB.innerHTML=hist.map(opt).join("");
   const curIdx=hist.findIndex(h=>h.file===m.fileName), bIdx=curIdx>=0?curIdx:hist.length-1, aIdx=Math.max(0,bIdx-1);
@@ -887,30 +1067,30 @@ function renderSetupCompare(hist){
   const paceEl=document.getElementById("setupPace"), diffEl=document.getElementById("setupDiff");
   if(!A||!B){ paceEl.innerHTML=""; diffEl.innerHTML=""; return; }
   const dt=B.bestLap-A.bestLap;
-  paceEl.innerHTML=`<div class="grid2">${pitKpi("Bestzeit A (vorher)",fmtTime(A.bestLap),(A.date||"").slice(0,10))}${pitKpi("Bestzeit B (nachher)",fmtTime(B.bestLap),(B.date||"").slice(0,10))}${pitKpi("Pace-Effekt B−A",fmtDelta(dt)+" s",dt<=0?"schneller 🎉":"langsamer",dt<=0?"down":"up")}${pitKpi("Geänderte Parameter",String(countSetupChanges(A.setup,B.setup)),"siehe unten")}</div>`;
+  paceEl.innerHTML=`<div class="grid2">${pitKpi(t("kBestA"),fmtTime(A.bestLap),(A.date||"").slice(0,10))}${pitKpi(t("kBestB"),fmtTime(B.bestLap),(B.date||"").slice(0,10))}${pitKpi(t("kPaceEffect"),fmtDelta(dt)+" s",dt<=0?t("fasterEmoji"):t("slower"),dt<=0?"down":"up")}${pitKpi(t("kChanged"),String(countSetupChanges(A.setup,B.setup)),t("seeBelow"))}</div>`;
   const rows=[]; new Set([...Object.keys(A.setup||{}),...Object.keys(B.setup||{})]).forEach(k=>{ const a=A.setup[k],b=B.setup[k]; if(a!==b)rows.push({k,a,b}); });
   rows.sort((x,y)=>setupLabel(x.k).localeCompare(setupLabel(y.k)));
-  diffEl.innerHTML = rows.length? `<table class="setuptbl"><thead><tr><th>Parameter</th><th>A (vorher)</th><th>B (nachher)</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${escapeHtml(setupLabel(r.k))}</td><td class="muted">${escapeHtml(r.a==null?'–':r.a)}</td><td><b>${escapeHtml(r.b==null?'–':r.b)}</b></td></tr>`).join("")}</tbody></table>` : '<div class="hint">Keine Unterschiede – identisches Setup in beiden Sessions.</div>';
+  diffEl.innerHTML = rows.length? `<table class="setuptbl"><thead><tr><th>${t("thParam")}</th><th>${t("thBefore")}</th><th>${t("thAfter")}</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${escapeHtml(setupLabel(r.k))}</td><td class="muted">${escapeHtml(r.a==null?'–':r.a)}</td><td><b>${escapeHtml(r.b==null?'–':r.b)}</b></td></tr>`).join("")}</tbody></table>` : `<div class="hint">${t("noDiff")}</div>`;
 }
 function renderSetupHints(){
   const m=STATE.model, el=document.getElementById("setupHints"); if(!m){el.innerHTML="";return;}
   const lap=m.laps.find(l=>l.complete&&!l.outlap&&!l.inlap)||m.laps.find(l=>l.complete)||STATE.cmpLap;
-  if(!lap){ el.innerHTML='<div class="hint">Keine vollständige Runde.</div>'; return; }
+  if(!lap){ el.innerHTML=`<div class="hint">${t("noComplete")}</div>`; return; }
   const W=m.wheels||{}, tc=wheelStats(W["TyresTempCentre"],lap.t0,lap.t1), tl=wheelStats(W["TyresTempLeft"],lap.t0,lap.t1), tr=wheelStats(W["TyresTempRight"],lap.t0,lap.t1);
   const hints=[];
   if(tc){ const favg=avgT([tc[0],tc[1]]), ravg=avgT([tc[2],tc[3]]);
     if(favg!=null&&ravg!=null){ const d=favg-ravg;
-      if(d>8) hints.push({t:"Tendenz Untersteuern",d:`Vorderreifen ${d.toFixed(0)} °C heißer als hinten. <b>Wo:</b> v. a. langsame/mittlere Kurven (vgl. Verlustzonen). <b>Setup:</b> Front-ARB weicher, mehr Frontflügel, oder Heck-ARB härter; Frontdruck ggf. senken.`});
-      else if(d<-8) hints.push({t:"Tendenz Übersteuern",d:`Hinterreifen ${(-d).toFixed(0)} °C heißer als vorne. <b>Setup:</b> mehr Heckflügel, Heck-ARB weicher, Diff-Power senken, Traktionskontrolle prüfen.`});
+      if(d>8) hints.push({title:t("hUnder"),body:t("hUnderD",d.toFixed(0))});
+      else if(d<-8) hints.push({title:t("hOver"),body:t("hOverD",(-d).toFixed(0))});
     }
     for(let k=0;k<4;k++){ const c=tc[k]&&tc[k].avg, io=innerOuter(tl,tr,k);
       if(c!=null&&io[0]!=null&&io[1]!=null){ const dC=c-(io[0]+io[1])/2;
-        if(dC>7) hints.push({t:"Druck "+WHEEL_LABELS[k],d:`Reifenmitte deutlich heißer → Druck ${WHEEL_LABELS[k]} senken.`});
-        else if(dC<-7) hints.push({t:"Druck "+WHEEL_LABELS[k],d:`Kanten heißer als Mitte → Druck ${WHEEL_LABELS[k]} erhöhen.`}); } }
+        if(dC>7) hints.push({title:t("hPress",WL(k)),body:t("hPressHi",WL(k))});
+        else if(dC<-7) hints.push({title:t("hPress",WL(k)),body:t("hPressLo",WL(k))}); } }
   }
   const corr=steeringCorrections(m,lap);
-  if(corr>=16) hints.push({t:"Evtl. nervöses Heck",d:`Auffällig viele schnelle Gegenlenk-Korrekturen (${corr}) – möglicher Hinweis auf instabiles Heck am Kurvenausgang. <b>Setup-Idee:</b> Heckstabilität/Traktion erhöhen (Diff-Power runter, Heck-ARB weicher, mehr Heckflügel). Mit Vorsicht – auch Randstein-/Bumps können das auslösen.`});
-  el.innerHTML = hints.length? hints.map(h=>`<div class="insight" style="background:var(--panel2)"><div class="badge" style="background:#16202e;color:var(--cyan);min-width:auto;padding:6px 10px">${escapeHtml(h.t)}</div><div class="body"><div class="sub">${h.d}</div></div></div>`).join("")+'<div class="hint" style="margin-top:6px">Tendenzen aus den Messdaten (v. a. Reifentemperaturen) – kein Ersatz für systematisches Testen. Mit mehreren schnellen Runden aussagekräftiger.</div>' : '<div class="hint">Keine klaren Setup-Tendenzen (Datenbasis evtl. zu klein – fahr ein paar schnelle Runden am Stück).</div>';
+  if(corr>=16) hints.push({title:t("hNervous"),body:t("hNervousD",corr)});
+  el.innerHTML = hints.length? hints.map(h=>`<div class="insight" style="background:var(--panel2)"><div class="badge" style="background:#16202e;color:var(--cyan);min-width:auto;padding:6px 10px">${escapeHtml(h.title)}</div><div class="body"><div class="sub">${h.body}</div></div></div>`).join("")+`<div class="hint" style="margin-top:6px">${t("hintsCaveat")}</div>` : `<div class="hint">${t("noHints")}</div>`;
 }
 function steeringCorrections(m,lap){ const cs=findChan(m.channels,ALIAS.steer); if(!cs)return 0; const a=Math.floor(lap.t0*cs.freq),b=Math.ceil(lap.t1*cs.freq); let corr=0,lastSign=0; for(let i=a+1;i<b&&i<cs.nData;i++){ const d=cs.data[i]-cs.data[i-1], sign=Math.sign(d); if(sign!==0&&sign!==lastSign&&Math.abs(d)>1.5){ corr++; lastSign=sign; } } return corr; }
 
@@ -922,6 +1102,9 @@ document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>switchTab(t.dataset.t
 addEventListener("resize",()=>{redrawAll(); if(STATE.refP)renderMap();});
 
 /* ---------- Start ---------- */
+document.getElementById("langDe").onclick=()=>setLang("de");
+document.getElementById("langEn").onclick=()=>setLang("en");
+setLang(LANG);
 poll();
 setInterval(poll, POLL_MS);
 </script>
