@@ -1,0 +1,21 @@
+# DuckDB CLI (wird vom Starter automatisch heruntergeladen)
+duckdbcli/
+duckdb_cli.zip
+
+# Claude Code / lokale Einstellungen
+.claude/
+
+# Logs & temporäre Dateien
+*.log
+_*
+
+# Node
+node_modules/
+
+# OS
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Telemetrie-Daten (gehören nicht ins Repo)
+*.duckdb

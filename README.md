@@ -1,0 +1,67 @@
+# LMU Telemetrie-Analyse
+
+Eine schlanke, lokale Web-App zur Analyse der **Le Mans Ultimate**-Telemetrie. Sie liest die vom Spiel
+aufgezeichneten **DuckDB-Telemetriedateien** (`UserData\Telemetry\*.duckdb`), lädt automatisch die neueste
+Aufnahme und zeigt dir, **wo du auf der Strecke Zeit verlierst** – plus Reifen-/Bremsen-Analyse,
+einen Boxenstopp-/Energie-Rechner und einen Setup-Vergleich.
+
+> Reine Lokal-App – läuft offline, keine Cloud, kein Account. Eine kleine Node-„Bridge" liest die
+> DuckDB-Dateien über die mitgelieferte DuckDB-CLI und liefert die HTML-Oberfläche unter `http://localhost:8777` aus.
+
+## Features
+
+- 🎯 **Wo verliere ich Zeit?** – Zeitdelta über die Runde, automatisch erkannte Verlustzonen mit konkreten Tipps (Bremspunkt, Mindestgeschwindigkeit, Gasannahme).
+- 📈 **Vergleich** – Speed / Gas / Bremse / Lenkung / Gang zweier Runden überlagert.
+- 🗺️ **Streckenkarte** – aus GPS, nach Geschwindigkeit eingefärbt, mit Verlustzonen-Markern.
+- 🛞 **Reifen & Bremsen** – Temperatur (innen/mitte/außen je Rad), Druck, Restprofil/Verschleiß, Bremstemperaturen + Hinweise zu Druck/Sturz/Balance.
+- 🔧 **Setup & Pace** – vergleicht zwei deiner Sessions: was am Setup geändert wurde und wie sich die Bestzeit verändert hat, plus Setup-Hinweise aus der Telemetrie.
+- ⛽ **Boxenstopp-Rechner** – aus Rennlänge, Reifensätzen, Fahrern und der gemessenen Pace/Verbrauch: Stint-Längen, Ziel-Virtual-Energy pro Runde, schnellste Gesamtzeit-Strategie, Fahrer-Einteilung (berücksichtigt Energie **und** Reifenverschleiß).
+- ⏺ **Live** – lädt nach jedem Stint automatisch die neue Aufnahme; während eine Aufnahme läuft (Datei gesperrt) wird die letzte fertige Session gezeigt.
+
+## Voraussetzungen
+
+- Windows mit **Le Mans Ultimate** (PC, ab v1.2 mit nativer Telemetrie-Aufzeichnung).
+- **Node.js** (https://nodejs.org) – wird zum Ausführen der Bridge gebraucht.
+- Telemetrie-Aufzeichnung in LMU aktiviert (siehe unten).
+
+## Telemetrie-Aufzeichnung in LMU aktivieren
+
+In `…\Le Mans Ultimate\UserData\player\Settings.JSON`:
+
+```json
+"Automatically Record Telemetry": true
+```
+
+(LMU vorher schließen.) Alternativ im Spiel unter *Optionen → Tastenbelegung* die Funktion
+**„Telemetry Recording"** auf eine Taste legen und pro Stint manuell starten. Danach entstehen
+`.duckdb`-Dateien in `UserData\Telemetry`.
+
+## Starten
+
+**`Start LMU Telemetrie.cmd`** doppelklicken. Beim ersten Start lädt das Skript automatisch die passende
+DuckDB-CLI herunter, startet die Bridge und öffnet `http://localhost:8777` im Browser.
+Das Konsolenfenster offen lassen, solange du die App benutzt.
+
+Der Telemetrie-Ordner wird automatisch über die Steam-Bibliotheken gefunden. Abweichender Pfad:
+```
+node lmu-bridge.js --dir="D:\Pfad\zu\Le Mans Ultimate\UserData\Telemetry"
+```
+
+## Wie es funktioniert
+
+LMU schreibt die Telemetrie als **DuckDB-Datenbank** – eine Tabelle pro Kanal/Event (`value` bzw.
+`value1..4` pro Rad), plus Meta-Tabellen (`metadata`, `channelsList`, `eventsList`); das komplette
+Fahrzeug-Setup steckt als JSON in `metadata`. Da ein Browser DuckDB nicht direkt lesen kann, liest die
+Bridge (`lmu-bridge.js`) die Dateien über `duckdb.exe` und stellt sie als JSON bereit. Die gesamte
+Analyse (Runden-Erkennung, Delta, Reifen, Strategie) läuft im Browser (`lmu-telemetry-analyzer.html`,
+Vanilla JS, eigene Canvas-Charts, keine externen Libraries).
+
+## Datenschutz
+
+Es werden **keine Daten hochgeladen**. Bestzeiten-Referenzen und der Session-Verlauf werden nur lokal im
+Browser (`localStorage`) gespeichert. Die Telemetriedateien bleiben auf deinem Rechner.
+
+## Lizenz
+
+MIT – siehe [LICENSE](LICENSE). Kein offizielles Studio-397/Motorsport-Games-Produkt; „Le Mans Ultimate"
+ist Eigentum der jeweiligen Rechteinhaber.
