@@ -48,9 +48,11 @@ const WANT_CH = {
   "Steering Pos": 50, "Engine RPM": 25, "GPS Latitude": 10, "GPS Longitude": 10,
   "G Force Lat": 10, "G Force Long": 10, "Fuel Level": 5, "Virtual Energy": 5,
   "SoC": 5, "Wheel Speed": 25, "Steering Shaft Torque": 25, "Path Lateral": 10,
+  "Ambient Temperature": 1, "Track Temperature": 1, "Wind Speed": 1, "Wind Heading": 1,
 };
 const WANT_EV = ["Gear", "Lap", "Lap Time", "Last Sector1", "Last Sector2",
-  "Current Sector", "In Pits", "TC", "ABS", "TCLevel", "ABSLevel", "Best LapTime"];
+  "Current Sector", "In Pits", "TC", "ABS", "TCLevel", "ABSLevel", "Best LapTime",
+  "Best Sector1", "Best Sector2", "Minimum Path Wetness", "CloudDarkness", "Yellow Flag State"];
 // Mehrdimensionale Kanäle pro Rad (value1..4 = FL,FR,RL,RR) -> Ziel-Frequenz
 const WANT_WHEEL = {
   "Tyres Wear": 5, "TyresPressure": 5, "TyresTempCentre": 10,
