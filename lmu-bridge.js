@@ -10,7 +10,7 @@ const http = require("http");
 const https = require("https");
 const fs = require("fs");
 const path = require("path");
-const { execFileSync, exec } = require("child_process");
+const { execFileSync, exec, spawn } = require("child_process");
 
 const ARG = Object.fromEntries(process.argv.slice(2).map(a => {
   const m = a.match(/^--([^=]+)=(.*)$/); return m ? [m[1], m[2]] : [a.replace(/^--/, ""), true];
@@ -21,7 +21,7 @@ const BASE = process.pkg ? path.dirname(process.execPath) : __dirname;
 const DUCKDB = path.join(BASE, "duckdbcli", "duckdb.exe");
 const HTML = path.join(__dirname, "lmu-telemetry-analyzer.html"); // im pkg-Snapshot eingebettet
 const REPO = "mzluzifer/lmu-telemetry-analyzer";
-const APP_VERSION = "1.7.0";
+const APP_VERSION = "1.10.0";
 
 // --- Kein Konsolenfenster -------------------------------------------------
 // Die .exe wird als GUI-Subsystem gebaut (Post-Build-Patch in build-exe.ps1),
@@ -60,7 +60,50 @@ function ensureDuckDB() {
       { stdio: "ignore", windowsHide: true });
   } catch (e) { console.error("DuckDB-Download fehlgeschlagen:", e.message); }
 }
-function openBrowser() { try { exec('start "" http://localhost:' + PORT, { windowsHide: true }); } catch (e) {} }
+// Standard-Browser als Tab öffnen (Fallback, wenn kein Edge/Chrome gefunden wird
+// oder der App-Start fehlschlägt). Beendet die Bridge NICHT mit, da hier kein
+// überwachbarer Prozess vorliegt.
+function openBrowserTab() { try { exec('start "" http://localhost:' + PORT, { windowsHide: true }); } catch (e) {} }
+
+// Edge (bevorzugt) oder Chrome finden – für den App-Modus (eigenes Fenster).
+function findBrowser() {
+  const pf = process.env["ProgramFiles"] || "C:\\Program Files";
+  const pf86 = process.env["ProgramFiles(x86)"] || "C:\\Program Files (x86)";
+  const lad = process.env["LOCALAPPDATA"] || "";
+  const candidates = [
+    path.join(pf86, "Microsoft", "Edge", "Application", "msedge.exe"),
+    path.join(pf, "Microsoft", "Edge", "Application", "msedge.exe"),
+    path.join(pf, "Google", "Chrome", "Application", "chrome.exe"),
+    path.join(pf86, "Google", "Chrome", "Application", "chrome.exe"),
+    lad && path.join(lad, "Google", "Chrome", "Application", "chrome.exe"),
+  ].filter(Boolean);
+  for (const c of candidates) { try { if (fs.existsSync(c)) return c; } catch (e) {} }
+  return null;
+}
+
+// App in einem eigenständigen Fenster öffnen (Edge/Chrome --app-Modus): kein Tab,
+// keine Adressleiste, eigenes Taskleisten-Icon. Das Fenster läuft als überwachter
+// Kindprozess – wird es geschlossen, beendet sich auch die Bridge.
+function openApp() {
+  const url = "http://localhost:" + PORT;
+  const browser = findBrowser();
+  if (!browser) { console.log("Kein Edge/Chrome gefunden – öffne Standard-Browser."); return openBrowserTab(); }
+  // Eigenes Profilverzeichnis erzwingt einen unabhängigen Browser-Prozess, dessen
+  // Lebensdauer dem Fenster entspricht (sonst übergibt Edge/Chrome an eine bereits
+  // laufende Instanz und der Kindprozess endet sofort).
+  const profile = path.join(BASE, ".app-profile");
+  try {
+    const child = spawn(browser, [
+      "--app=" + url,
+      "--user-data-dir=" + profile,
+      "--no-first-run",
+      "--no-default-browser-check",
+      "--window-size=1400,900",
+    ], { stdio: "ignore", windowsHide: true });
+    child.on("exit", () => { console.log("App-Fenster geschlossen – Bridge wird beendet."); process.exit(0); });
+    child.on("error", e => { console.error("App-Fenster konnte nicht gestartet werden:", e.message); openBrowserTab(); });
+  } catch (e) { console.error("App-Start fehlgeschlagen:", e.message); openBrowserTab(); }
+}
 // Neueste Release-Version ermitteln: erst gh (auch bei privatem Repo), sonst öffentliche API
 function getLatestVersion(cb) {
   for (const g of ["gh", "C:\\Program Files\\GitHub CLI\\gh.exe"]) {
@@ -297,10 +340,10 @@ ensureDuckDB();
 server.listen(PORT, () => {
   console.log("======================================================");
   console.log("  LMU Telemetrie-Analyse v" + APP_VERSION);
-  console.log("  ▶  Im Browser:  http://localhost:" + PORT);
+  console.log("  ▶  Eigenes App-Fenster (Adresse: http://localhost:" + PORT + ")");
   console.log("  Telemetrie:     " + (TEL_DIR || "NICHT GEFUNDEN – mit --dir=... angeben"));
   console.log("  DuckDB CLI:     " + (fs.existsSync(DUCKDB) ? "ok" : "FEHLT"));
-  console.log("  (Beenden: ⏻-Button in der App oder Task-Manager.)");
+  console.log("  (Beenden: App-Fenster schließen, ⏻-Button oder Task-Manager.)");
   console.log("======================================================");
-  if (!ARG["no-open"]) setTimeout(openBrowser, 800);
+  if (!ARG["no-open"]) setTimeout(openApp, 800);
 });

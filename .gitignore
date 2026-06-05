@@ -9,6 +9,9 @@ duckdb_cli.zip
 *.log
 _*
 
+# Browser-Profil des App-Fensters (Edge/Chrome --app-Modus)
+.app-profile/
+
 # Node
 node_modules/
 dist/

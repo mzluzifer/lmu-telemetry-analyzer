@@ -10,7 +10,7 @@ echo   LMU Telemetrie-Analyse
 echo ------------------------------------------------------------
 echo   Liest deine aufgezeichnete Telemetrie
 echo   (UserData\Telemetry\*.duckdb) und oeffnet die Auswertung
-echo   im Browser unter http://localhost:8777
+echo   in einem eigenen App-Fenster (Adresse: http://localhost:8777)
 echo.
 echo   Dieses Fenster bitte geoeffnet lassen, solange du die
 echo   App benutzt. Zum Beenden: Fenster schliessen.

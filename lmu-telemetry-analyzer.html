@@ -1561,7 +1561,7 @@ document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>switchTab(t.dataset.t
 addEventListener("resize",()=>{redrawAll(); if(STATE.refP){renderAllMaps(); renderPitMap();}});
 
 /* ---------- Versionscheck (GitHub Releases) ---------- */
-const APP_VERSION="1.9.0";
+const APP_VERSION="1.10.0";
 let versionChecked=false;
 function cmpVer(a,b){ const pa=String(a).split("."),pb=String(b).split("."); for(let i=0;i<3;i++){ const x=parseInt(pa[i]||0,10),y=parseInt(pb[i]||0,10); if(x>y)return 1; if(x<y)return -1; } return 0; }
 async function checkVersion(){ if(versionChecked)return; versionChecked=true;
