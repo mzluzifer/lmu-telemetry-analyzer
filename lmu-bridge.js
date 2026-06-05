@@ -21,7 +21,7 @@ const BASE = process.pkg ? path.dirname(process.execPath) : __dirname;
 const DUCKDB = path.join(BASE, "duckdbcli", "duckdb.exe");
 const HTML = path.join(__dirname, "lmu-telemetry-analyzer.html"); // im pkg-Snapshot eingebettet
 const REPO = "mzluzifer/lmu-telemetry-analyzer";
-const APP_VERSION = "1.6.1";
+const APP_VERSION = "1.7.0";
 
 // --- Kein Konsolenfenster -------------------------------------------------
 // Die .exe wird als GUI-Subsystem gebaut (Post-Build-Patch in build-exe.ps1),

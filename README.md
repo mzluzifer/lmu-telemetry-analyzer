@@ -12,7 +12,7 @@ einen Boxenstopp-/Energie-Rechner und einen Setup-Vergleich.
 
 - 🎯 **Wo verliere ich Zeit?** – Zeitdelta über die Runde, automatisch erkannte Verlustzonen mit konkreten Tipps (Bremspunkt, Mindestgeschwindigkeit, Gasannahme).
 - 📈 **Vergleich** – Speed / Gas / Bremse / Lenkung / Gang zweier Runden überlagert.
-- 🗺️ **Interaktive Streckenkarte** (groß, oben; auch im Vergleich- und Reifen-Tab) – mit der Maus über die Strecke fahren zeigt **Speed, Delta, Gas und Bremse** an dieser Stelle; umschaltbar Delta- (Gewinn/Verlust) oder Tempo-Färbung; im Reifen-Tab nach **Bremstemperatur** (Ø 4 Bremsen) eingefärbt; synchron mit den Charts.
+- 🗺️ **Interaktive Streckenkarte** (groß, oben; auch im Vergleich- und Reifen-Tab) – mit der Maus über die Strecke fahren zeigt **Speed, Delta, Gas und Bremse** an dieser Stelle; umschaltbar Delta- (Gewinn/Verlust) oder Tempo-Färbung; im Reifen-Tab nach **Bremstemperatur** (Ø 4 Bremsen) eingefärbt; synchron mit den Charts. **Alle Streckenkarten sind zoombar** (Mausrad zoomen, ziehen zum Verschieben, Doppelklick = zurücksetzen).
 - 📂 **Referenz-Lap hochladen** – eigene **MoTeC `.ld`-Datei** als Referenzrunde laden und deine Runden dagegen vergleichen.
 - ⏱️ **Sektor-Zeiten** – S1/S2/S3 pro Runde, beste Sektoren hervorgehoben, theoretische Bestzeit.
 - 🌦️ **Wetter & Strecke** – Bedingungen, Luft-/Streckentemperatur, Wind, Nässe.
@@ -21,7 +21,7 @@ einen Boxenstopp-/Energie-Rechner und einen Setup-Vergleich.
 - 🔄 **Versionscheck** – meldet automatisch, wenn auf GitHub ein neueres Release verfügbar ist.
 - 🛞 **Reifen & Bremsen** – Temperatur (innen/mitte/außen je Rad), Druck, Restprofil/Verschleiß, Bremstemperaturen + Hinweise zu Druck/Sturz/Balance.
 - 🔧 **Setup & Pace** – vergleicht zwei deiner Sessions: was am Setup geändert wurde und wie sich die Bestzeit verändert hat, plus Setup-Hinweise aus der Telemetrie.
-- ⛽ **Boxenstopp-Rechner** – aus Rennlänge, Reifensätzen, Fahrern und der gemessenen Pace/Verbrauch: Stint-Längen, Ziel-Virtual-Energy pro Runde, schnellste Gesamtzeit-Strategie, Fahrer-Einteilung (berücksichtigt Energie **und** Reifenverschleiß).
+- ⛽ **Boxenstopp-Rechner** – aus Rennlänge, Reifensätzen, Fahrern und der gemessenen Pace/Verbrauch: Stint-Längen, Ziel-Virtual-Energy pro Runde, schnellste Gesamtzeit-Strategie, Fahrer-Einteilung (berücksichtigt Energie **und** Reifenverschleiß). Plus **Lift-&-Coast-Streckenkarte**: zeigt die Anbremszonen mit dem größten Spritspar-Potenzial (① = beste Zone).
 - ⏺ **Live** – lädt nach jedem Stint automatisch die neue Aufnahme; während eine Aufnahme läuft (Datei gesperrt) wird die letzte fertige Session gezeigt.
 - 🌐 **Sprache** – Oberfläche per Klick umschaltbar zwischen **Deutsch und Englisch** (oben rechts).
 - 🪟 **Aufgeräumte Oberfläche** – **einklappbare Sidebar**, **Delta-Grafik** auch im Vergleich-Tab und Links zu **GitHub** und zum **YouTube-Kanal** in der Kopfzeile. Delta-Vergleiche ignorieren Out-/In-Laps konsequent als Referenz.
