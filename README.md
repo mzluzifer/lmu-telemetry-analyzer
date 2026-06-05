@@ -1,5 +1,7 @@
 # LMU Telemetrie-Analyse
 
+🌐 **Deutsch** · [English](README.en.md)
+
 Eine schlanke, lokale Web-App zur Analyse der **Le Mans Ultimate**-Telemetrie. Sie liest die vom Spiel
 aufgezeichneten **DuckDB-Telemetriedateien** (`UserData\Telemetry\*.duckdb`), lädt automatisch die neueste
 Aufnahme und zeigt dir, **wo du auf der Strecke Zeit verlierst** – plus Reifen-/Bremsen-Analyse,
