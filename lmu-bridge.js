@@ -99,7 +99,7 @@ function openApp() {
       "--no-first-run",
       "--no-default-browser-check",
       "--window-size=1400,900",
-    ], { stdio: "ignore", windowsHide: true });
+    ], { stdio: "ignore" });   // KEIN windowsHide: das würde Edges/Chromes GUI-Fenster verstecken (SW_HIDE)
     child.on("exit", () => { console.log("App-Fenster geschlossen – Bridge wird beendet."); process.exit(0); });
     child.on("error", e => { console.error("App-Fenster konnte nicht gestartet werden:", e.message); openBrowserTab(); });
   } catch (e) { console.error("App-Start fehlgeschlagen:", e.message); openBrowserTab(); }
