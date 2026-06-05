@@ -250,6 +250,15 @@
         </div>
         <div class="card"><h2 data-i18n="setupDiffTitle">Geänderte Setup-Parameter (A → B)</h2><div class="scrollx" id="setupDiff"></div></div>
         <div class="card"><h2 data-i18n="setupHintsTitle">Setup-Hinweise aus der Telemetrie – wo ansetzen?</h2><div id="setupHints"></div></div>
+        <div class="card">
+          <h2 data-i18n="setupShopsTitle">Setup-Anbieter</h2>
+          <div class="hint" data-i18n="setupShopsHint">Externe Anbieter für fertige Setups (öffnen in einem neuen Tab).</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+            <a class="iconbtn" href="https://bealien.gg/" target="_blank" rel="noopener" title="bealien.gg">⧉ bealien.gg</a>
+            <a class="iconbtn" href="https://gosetups.gg/" target="_blank" rel="noopener" title="gosetups.gg">⧉ gosetups.gg</a>
+            <a class="iconbtn" href="https://coachdaveacademy.com/" target="_blank" rel="noopener" title="coachdaveacademy.com">⧉ Coach Dave Academy</a>
+          </div>
+        </div>
       </section>
 
       <section data-panel="channels" style="display:none">
@@ -343,6 +352,7 @@ const STR = {
   tyreTipsTitle:"Reifen-Hinweise (Druck · Sturz · Balance)", brakeTemp:"Bremsen-Temperatur (°C, Rundendurchschnitt)", wearSessionTitle:"Verschleiß über die Session",
   setupPaceTitle:"Hat eine Setup-Änderung deine Pace verändert?", setupPaceHint:"Vergleicht zwei deiner aufgezeichneten Sessions (gleiches Auto + Strecke): was wurde geändert und wie hat sich die Bestzeit verändert. Sessions werden beim Laden automatisch im Browser gemerkt.",
   sessionA:"Session A (vorher)", sessionB:"Session B (nachher)", setupDiffTitle:"Geänderte Setup-Parameter (A → B)", setupHintsTitle:"Setup-Hinweise aus der Telemetrie – wo ansetzen?",
+  setupShopsTitle:"Setup-Anbieter", setupShopsHint:"Externe Anbieter für fertige Setups (öffnen in einem neuen Tab).",
   anyChannel:"Beliebigen Kanal vergleichen", raceData:"Renn-Eckdaten", raceLength:"Rennlänge (Minuten)", tyreSets:"Reifensätze", numDrivers:"Anzahl Fahrer",
   pitLoss:"Boxenstopp-Verlust (s)", avgLapInput:"Ø Rundenzeit (m:ss.s)", vePerLapInput:"Virtual Energy / Runde (%)", fuelPerLapInput:"Sprit / Runde (L)",
   wearPerLapInput:"Reifenverschleiß / Runde (%)", savePenaltyInput:"Zeitverlust je % Sparen (s/Rd)", recommendation:"Empfehlung – schnellste Gesamtzeit",
@@ -432,6 +442,7 @@ const STR = {
   tyreTipsTitle:"Tyre advice (pressure · camber · balance)", brakeTemp:"Brake temperature (°C, lap average)", wearSessionTitle:"Wear over the session",
   setupPaceTitle:"Did a setup change affect your pace?", setupPaceHint:"Compares two of your recorded sessions (same car + track): what changed and how your best lap changed. Sessions are remembered automatically in the browser when loaded.",
   sessionA:"Session A (before)", sessionB:"Session B (after)", setupDiffTitle:"Changed setup parameters (A → B)", setupHintsTitle:"Setup advice from telemetry – where to start?",
+  setupShopsTitle:"Setup providers", setupShopsHint:"External providers for ready-made setups (open in a new tab).",
   anyChannel:"Compare any channel", raceData:"Race parameters", raceLength:"Race length (minutes)", tyreSets:"Tyre sets", numDrivers:"Number of drivers",
   pitLoss:"Pit stop loss (s)", avgLapInput:"Avg lap time (m:ss.s)", vePerLapInput:"Virtual energy / lap (%)", fuelPerLapInput:"Fuel / lap (L)",
   wearPerLapInput:"Tyre wear / lap (%)", savePenaltyInput:"Time loss per % saving (s/lap)", recommendation:"Recommendation – fastest total time",
@@ -1550,7 +1561,7 @@ document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>switchTab(t.dataset.t
 addEventListener("resize",()=>{redrawAll(); if(STATE.refP){renderAllMaps(); renderPitMap();}});
 
 /* ---------- Versionscheck (GitHub Releases) ---------- */
-const APP_VERSION="1.8.0";
+const APP_VERSION="1.9.0";
 let versionChecked=false;
 function cmpVer(a,b){ const pa=String(a).split("."),pb=String(b).split("."); for(let i=0;i<3;i++){ const x=parseInt(pa[i]||0,10),y=parseInt(pb[i]||0,10); if(x>y)return 1; if(x<y)return -1; } return 0; }
 async function checkVersion(){ if(versionChecked)return; versionChecked=true;
