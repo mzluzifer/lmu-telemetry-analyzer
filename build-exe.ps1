@@ -9,10 +9,13 @@
 $ErrorActionPreference = "Stop"
 Set-Location -LiteralPath $PSScriptRoot
 
-$out = Join-Path $PSScriptRoot "dist\LMU-Telemetrie.exe"
+# Version aus package.json -> Dateiname mit Versions-Suffix (z. B. LMU-Telemetry-Analyzer-V1.8.0.exe)
+$version = (Get-Content -Raw -LiteralPath (Join-Path $PSScriptRoot "package.json") | ConvertFrom-Json).version
+$exeName = "LMU-Telemetry-Analyzer-V$version.exe"
+$out = Join-Path $PSScriptRoot "dist\$exeName"
 
-# Laufende Instanz beenden (sonst EPERM beim Überschreiben der .exe)
-Get-Process LMU-Telemetrie -ErrorAction SilentlyContinue | Stop-Process -Force
+# Laufende Instanz(en) beenden (sonst EPERM beim Überschreiben der .exe)
+Get-Process -ErrorAction SilentlyContinue | Where-Object { $_.ProcessName -like "LMU-Telemetry-Analyzer*" -or $_.ProcessName -eq "LMU-Telemetrie" } | Stop-Process -Force -ErrorAction SilentlyContinue
 
 Write-Host "==> pkg: baue $out"
 npx pkg@5.8.1 . --targets node18-win-x64 --output $out

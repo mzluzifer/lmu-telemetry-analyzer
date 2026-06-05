@@ -58,6 +58,7 @@
   tr.lap.invalid{opacity:.5}
   .pill{display:inline-block;font-size:10px;padding:1px 6px;border-radius:20px;border:1px solid var(--line);color:var(--muted);margin-left:6px}
   .pill.ref{color:var(--ref);border-color:var(--ref)} .pill.cmp{color:var(--cmp);border-color:var(--cmp)}
+  .pill.best{color:var(--good);border-color:var(--good)}
   canvas{display:block;width:100%;background:#0b0e13;border-radius:8px}
   .chartwrap{position:relative}
   .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;margin:0 2px 8px}
@@ -97,7 +98,12 @@
   table.pit td,table.pit th{text-align:right;white-space:nowrap}
   table.pit td:first-child,table.pit th:first-child{text-align:left}
   tr.fastest td{background:#10261a;color:var(--txt)}
+  tr.lc-hi td{background:#1c2840;color:var(--txt)}
   tr.invalid td{opacity:.45}
+  table.pit tbody tr[data-s]{cursor:pointer}
+  table.pit tbody tr[data-s]:hover td{background:#1a2233}
+  tr.selstrat td{box-shadow:inset 0 0 0 1px var(--accent)}
+  tr.selstrat td:first-child{box-shadow:inset 1px 0 0 0 var(--accent),inset 0 1px 0 0 var(--accent),inset 0 -1px 0 0 var(--accent)}
   #btnSaveRef{width:100%;font-size:12px;margin-top:8px}
   .wheelgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:620px}
   .wheel{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:10px 12px}
@@ -270,7 +276,7 @@
         </div>
         <div class="card">
           <h2 data-i18n="liftCoastTitle">Lift &amp; Coast – beste Sprit-Spar-Zonen</h2>
-          <div class="chartwrap"><canvas id="cPitMap" height="360"></canvas></div>
+          <div class="chartwrap"><canvas id="cPitMap" height="360"></canvas><div class="tooltip" id="ttPitMap"></div></div>
           <div class="legend" id="pitMapLegend" style="margin-top:6px"></div>
           <div id="pitMapList" style="margin-top:10px"></div>
           <div class="hint" id="pitMapHint" data-i18n="liftCoastHint" style="margin-top:6px"></div>
@@ -342,7 +348,9 @@ const STR = {
   wearPerLapInput:"Reifenverschleiß / Runde (%)", savePenaltyInput:"Zeitverlust je % Sparen (s/Rd)", recommendation:"Empfehlung – schnellste Gesamtzeit",
   driverSplit:"Fahrer-Einteilung", strategyCompare:"Strategie-Vergleich", thStops:"Stopps", thStints:"Stints", thLapsStint:"Rd/Stint", thMinStint:"Min/Stint",
   thVELap:"VE %/Rd", thSave:"Sparen", thLStint:"L/Stint", thTotalTime:"Gesamtzeit", thOk:"OK",
-  strategyHint:'Grün = schnellste machbare Strategie. „Sparen" = nötiger Lift&Coast gegenüber deinem Telemetrie-Verbrauch (⚠ = mehr als machbar).',
+  strategyHint:'Grün = schnellste machbare Strategie. „Sparen" = nötiger Lift&Coast gegenüber deinem Telemetrie-Verbrauch (⚠ = mehr als machbar). Zeile anklicken, um eine Strategie zu wählen – die Lift-&-Coast-Punkte werden dafür neu berechnet.',
+  lcSaveBasis:(p)=>`Lift-Punkte berechnet für ≈ ${p} % Ersparnis (gewählte Strategie).`, lcSaveBasisTele:"Lift-Punkte aus Telemetrie (Standard – unten eine Strategie wählen).", lcSaveBasisNone:"Energie reicht – kaum Lift & Coast nötig.",
+  fastestBadge:"schnellste", selectedBadge:"gewählt", stratSlower:(s)=>`+${s} s ggü. schnellster Strategie`,
   bridgeConn:"Bridge / Verbindung", channelsInSession:"Kanäle in dieser Session", thName:"Name", thUnit:"Einheit", thSamples:"Samples",
   saveRef:"📌 Diese Runde als Bestzeit speichern", saveRefUpdate:(t)=>"📌 Bestzeit aktualisieren ("+t+")",
   live:"Live", manual:"Manuell", connecting:"Verbinde mit Bridge…", waitingRec:"Warte auf Aufnahmen…",
@@ -405,9 +413,10 @@ const STR = {
   uploadRef:"📂 Referenz-Lap laden (.ld)", refUploaded:(n,tm)=>"📂 "+n+" · "+tm, ldParsing:"Lese .ld-Datei …", ldError:"Konnte die .ld-Datei nicht lesen (kein gültiges MoTeC-Format oder keine GPS/Lap-Daten).", ldLoaded:(tm,track)=>"Referenz geladen: "+tm+" ("+track+")", ldTrackMismatch:"Achtung: Strecke/Länge weicht von der Session ab – Vergleich evtl. ungenau.", refSrcUploaded:"📂 Hochgeladene Referenz",
   quit:"⏻ Beenden", quitDone:"App beendet – du kannst diesen Tab schließen.", deltaCompareTitle:"Zeitdelta (Vergleich vs. Referenz)",
   mapZoomHint:"Mausrad: zoomen · ziehen: verschieben · Doppelklick: zurücksetzen",
-  liftCoastTitle:"Lift & Coast – beste Sprit-Spar-Zonen", liftCoastHint:"Markiert sind die Anbremszonen mit dem größten Spritspar-Potenzial: hohe Eintrittsgeschwindigkeit + starkes Bremsen. Dort früher vom Gas gehen (lift & coast) spart am meisten Sprit bei geringstem Zeitverlust. ① = beste Zone. Karte zoombar (Mausrad/ziehen).",
+  liftCoastTitle:"Lift & Coast – beste Sprit-Spar-Zonen", liftCoastHint:"Markiert sind die Anbremszonen mit dem größten Spritspar-Potenzial: hohe Eintrittsgeschwindigkeit + starkes Bremsen. Dort früher vom Gas gehen (lift & coast) spart am meisten Sprit bei geringstem Zeitverlust. ① = beste Zone. Cyan = Coast-Zone (vom Gas), roter Ring = normaler Bremspunkt. Mit der Maus über eine Zone fahren, um sie in der Tabelle zu markieren. Karte zoombar (Mausrad/ziehen).",
   liftCoastNone:"Keine ausgeprägten Anbremszonen erkannt (Referenzrunde mit GPS nötig).",
-  lcEntry:"Eintritt", lcDrop:"Tempoabfall", lcCoast:"Coast-Zone", lcZone:(n)=>"Zone "+n, lcAt:"bei"
+  lcEntry:"Eintritt", lcDrop:"Tempoabfall", lcCoast:"Coast-Zone", lcZone:(n)=>"Zone "+n, lcAt:"bei",
+  lcLiftPt:"Lift bei", lcBrakePt:"Bremspunkt", lcCoastGap:"Coast"
  },
  en:{
   reload:"↻ Refresh", session:"Session", refSource:"Reference source", refLap:"Reference lap (best)", cmpLap:"Comparison lap",
@@ -428,7 +437,9 @@ const STR = {
   wearPerLapInput:"Tyre wear / lap (%)", savePenaltyInput:"Time loss per % saving (s/lap)", recommendation:"Recommendation – fastest total time",
   driverSplit:"Driver split", strategyCompare:"Strategy comparison", thStops:"Stops", thStints:"Stints", thLapsStint:"Laps/stint", thMinStint:"Min/stint",
   thVELap:"VE %/lap", thSave:"Save", thLStint:"L/stint", thTotalTime:"Total time", thOk:"OK",
-  strategyHint:'Green = fastest feasible strategy. "Save" = required lift&coast vs your telemetry consumption (⚠ = more than feasible).',
+  strategyHint:'Green = fastest feasible strategy. "Save" = required lift&coast vs your telemetry consumption (⚠ = more than feasible). Click a row to pick a strategy – the lift & coast points are recalculated for it.',
+  lcSaveBasis:(p)=>`Lift points for ≈ ${p} % saving (selected strategy).`, lcSaveBasisTele:"Lift points from telemetry (default – pick a strategy below).", lcSaveBasisNone:"Energy is enough – little lift & coast needed.",
+  fastestBadge:"fastest", selectedBadge:"selected", stratSlower:(s)=>`+${s} s vs fastest strategy`,
   bridgeConn:"Bridge / connection", channelsInSession:"Channels in this session", thName:"Name", thUnit:"Unit", thSamples:"Samples",
   saveRef:"📌 Save this lap as best reference", saveRefUpdate:(t)=>"📌 Update best reference ("+t+")",
   live:"Live", manual:"Manual", connecting:"Connecting to bridge…", waitingRec:"Waiting for recordings…",
@@ -491,9 +502,10 @@ const STR = {
   uploadRef:"📂 Load reference lap (.ld)", refUploaded:(n,tm)=>"📂 "+n+" · "+tm, ldParsing:"Reading .ld file …", ldError:"Could not read the .ld file (not a valid MoTeC format or no GPS/lap data).", ldLoaded:(tm,track)=>"Reference loaded: "+tm+" ("+track+")", ldTrackMismatch:"Note: track/length differs from the session – comparison may be inaccurate.", refSrcUploaded:"📂 Uploaded reference",
   quit:"⏻ Quit", quitDone:"App stopped – you can close this tab.", deltaCompareTitle:"Time delta (comparison vs reference)",
   mapZoomHint:"Wheel: zoom · drag: pan · double-click: reset",
-  liftCoastTitle:"Lift & coast – best fuel-saving zones", liftCoastHint:"Highlighted are the braking zones with the greatest fuel-saving potential: high entry speed + heavy braking. Lifting off the throttle earlier there (lift & coast) saves the most fuel for the least lap time. ① = best zone. Map is zoomable (wheel/drag).",
+  liftCoastTitle:"Lift & coast – best fuel-saving zones", liftCoastHint:"Highlighted are the braking zones with the greatest fuel-saving potential: high entry speed + heavy braking. Lifting off the throttle earlier there (lift & coast) saves the most fuel for the least lap time. ① = best zone. Cyan = coast zone (off throttle), red ring = normal braking point. Hover over a zone to highlight it in the table. Map is zoomable (wheel/drag).",
   liftCoastNone:"No pronounced braking zones detected (needs a reference lap with GPS).",
-  lcEntry:"Entry", lcDrop:"Speed drop", lcCoast:"Coast zone", lcZone:(n)=>"Zone "+n, lcAt:"at"
+  lcEntry:"Entry", lcDrop:"Speed drop", lcCoast:"Coast zone", lcZone:(n)=>"Zone "+n, lcAt:"at",
+  lcLiftPt:"Lift at", lcBrakePt:"Brake point", lcCoastGap:"Coast"
  }
 };
 function t(k,...a){ let v=(STR[LANG]&&STR[LANG][k]); if(v==null)v=STR.de[k]; if(v==null)return k; return typeof v==="function"?v(...a):v; }
@@ -715,10 +727,31 @@ function showTip(obj,e){ if(!obj.readFn||GHOST.x==null){obj.tt.style.display="no
   obj.tt.style.display="block"; const r=obj.cv.getBoundingClientRect(); let x=e.clientX-r.left+14,y=e.clientY-r.top+12; if(x>r.width-150)x-=170; obj.tt.style.left=x+"px";obj.tt.style.top=y+"px"; }
 function redrawAll(){ CHARTS.forEach(c=>{try{c.renderFn();}catch(e){}}); }
 function gIdx(x){ return Math.round(x/STATE.refP.L*(GRID_N-1)); }
+/* Sektor-Grenzen (aus Sektor-Zeiten) als Positionen auf der Referenzrunde */
+function computeSectorFracs(){
+  STATE.sectorFracs=null;
+  const m=STATE.model, p=STATE.refP; if(!m||!p||!p.time) return;
+  const N=p.time.length, T=p.time[N-1]; if(!(T>0)) return;
+  const idxAt=fr=>{ const tgt=fr*T; let i=1; while(i<N&&p.time[i]<tgt)i++; return Math.max(0,Math.min(N-1,i)); };
+  // 1) Exakte Sektorzeiten einer Runde
+  let lap=(STATE.refLap&&STATE.refLap.s1!=null)?STATE.refLap : m.laps.find(l=>l.s1!=null&&l.s2!=null&&l.s3!=null);
+  if(lap&&lap.s1!=null&&lap.s2!=null&&lap.s3!=null){
+    const tot=lap.s1+lap.s2+lap.s3;
+    if(tot>0){ STATE.sectorFracs={ i1:idxAt(lap.s1/tot), i2:idxAt((lap.s1+lap.s2)/tot), N }; return; }
+  }
+  // 2) Fallback: kumulative Best-Sector-Events (S1, S1+S2) relativ zur Referenz-Rundenzeit
+  const ev=m.events||{}; const b1=ev["Best Sector1"], b2=ev["Best Sector2"];
+  const refT=(STATE.refInfo&&STATE.refInfo.lapTime)||(STATE.refLap&&STATE.refLap.lapTime);
+  if(b1&&b1.length&&b2&&b2.length&&refT>0){
+    const s1=+b1[b1.length-1].v, s12=+b2[b2.length-1].v;
+    if(s1>0&&s12>s1&&s12<refT){ STATE.sectorFracs={ i1:idxAt(s1/refT), i2:idxAt(s12/refT), N }; }
+  }
+}
 
 /* ---------- Rendern ---------- */
 function recompute(){
   const m=STATE.model; if(!m) return;
+  STATE.selStratS=null;
   let refP=null, refTime=null, refLabel="—", ext=false;
   if(STATE.refSource==="uploaded" && STATE.uploadedRef){ refP=STATE.uploadedRef.profile; refTime=STATE.uploadedRef.lapTime; refLabel="📂 "+fmtTime(refTime); ext=true; }
   else if(STATE.refSource==="saved"){ const saved=getSavedRef(m.meta&&m.meta.TrackName); if(saved&&saved.profile){ refP=saved.profile; refTime=saved.lapTime; refLabel=t("refStar",fmtTime(saved.lapTime)); ext=true; } }
@@ -727,6 +760,7 @@ function recompute(){
   if(!refP||!STATE.cmpP){ setStatus(t("lapIncomplete")); return; }
   STATE.refP=refP; STATE.refInfo={lapTime:refTime,label:refLabel,saved:ext};
   STATE.ana=analyze(refP,STATE.cmpP);
+  computeSectorFracs();
   buildLapTable(); renderKPIs(); renderInsights(); renderSectors(); renderSession(); buildCharts(); fillChanSelect(); renderAllMaps(); renderTyres(); redrawAll();
   const single = !ext && STATE.refLap===STATE.cmpLap;
   document.getElementById("singleLapNote").innerHTML = single ? `<div class="banner">${t("singleLap")}</div>` : "";
@@ -808,8 +842,21 @@ function drawTrackMap(cv, p, segColor, o){
   for(let i=1;i<N;i++){ ctx.strokeStyle=segColor(i); ctx.beginPath();ctx.moveTo(PX(i-1),PY(i-1));ctx.lineTo(PX(i),PY(i));ctx.stroke(); }
   if(o.zones) o.zones.forEach(zn=>{ const i=(zn.a+zn.b)>>1; ctx.fillStyle="#ff00d0";ctx.beginPath();ctx.arc(PX(i),PY(i),o.dot||6,0,7);ctx.fill();
     if(o.zoneText){ctx.fillStyle="#fff";ctx.font="bold 11px Segoe UI";ctx.fillText("+"+zn.loss.toFixed(2)+"s",PX(i)+9,PY(i)+4);} });
-  ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(PX(0),PY(0),o.dot?4:5,0,7);ctx.fill();
-  if(o.pois) o.pois.forEach(pt=>{ const i=Math.max(0,Math.min(N-1,pt.i)); ctx.fillStyle=pt.color||"#58a6ff"; ctx.beginPath();ctx.arc(PX(i),PY(i),o.dot||6,0,7);ctx.fill();
+  // Sektorgrenzen (amber) + Start/Ziel (🏁) – auf allen Karten
+  const showLab=o.zoneText!==false, sf=STATE.sectorFracs;
+  if(sf){ const mp=fr=>Math.max(0,Math.min(N-1,Math.round(fr*(N-1))));
+    [[mp(sf.i1/(sf.N-1)),"S2"],[mp(sf.i2/(sf.N-1)),"S3"]].forEach(([idx,lab])=>{ const x=PX(idx),y=PY(idx), rr=(o.dot||6);
+      ctx.fillStyle="#f0a020"; ctx.beginPath();ctx.arc(x,y,rr,0,7);ctx.fill();
+      ctx.lineWidth=1.5; ctx.strokeStyle="#0b0e13"; ctx.stroke(); ctx.lineWidth=o.lw||4;
+      if(showLab){ ctx.fillStyle="#f0a020";ctx.font="bold 11px Segoe UI";ctx.fillText(lab,x+rr+2,y+4); } });
+  }
+  { const x=PX(0),y=PY(0), rr=o.dot?5:5;
+    ctx.fillStyle="#fff"; ctx.beginPath();ctx.arc(x,y,rr,0,7);ctx.fill();
+    ctx.lineWidth=2; ctx.strokeStyle="#0b0e13"; ctx.beginPath();ctx.arc(x,y,rr,0,7);ctx.stroke(); ctx.lineWidth=o.lw||4;
+    if(showLab){ ctx.font="13px Segoe UI";ctx.fillText("🏁",x+rr+2,y+5); } }
+  if(o.pois) o.pois.forEach(pt=>{ const i=Math.max(0,Math.min(N-1,pt.i));
+    if(pt.ring){ ctx.strokeStyle=pt.color||"#58a6ff"; ctx.lineWidth=2.5; ctx.beginPath();ctx.arc(PX(i),PY(i),(o.dot||6)+1,0,7);ctx.stroke(); ctx.lineWidth=o.lw||4; }
+    else { ctx.fillStyle=pt.color||"#58a6ff"; ctx.beginPath();ctx.arc(PX(i),PY(i),o.dot||6,0,7);ctx.fill(); }
     if(pt.label){ctx.fillStyle="#fff";ctx.font="bold 11px Segoe UI";ctx.fillText(pt.label,PX(i)+9,PY(i)+4);} });
   // Hover-Marker (Bruchteil der Runde, lagenunabhängig)
   if(o.markerFrac!=null){ const idx=Math.max(0,Math.min(N-1,Math.round(o.markerFrac*(N-1))));
@@ -1221,8 +1268,16 @@ function pitPrefill(m){
   document.getElementById("piTeleNote").innerHTML=t("teleNote",escapeHtml(m.meta.TrackName||""),fmtTime(m.avgLap),fmtTime(m.bestLap),veS,fuS,wS);
 }
 /* ---------- Lift & Coast: beste Sprit-Spar-Zonen ---------- */
-function liftCoastZones(p){
+// Coast-Dauer (s) aus nötiger Ersparnis: 0 % -> kurz, PIT_MAXSAVE -> lange segeln.
+// null/undefined => Telemetrie-Default (≈1,4 s).
+function coastSecFor(savePct){
+  if(savePct==null||!isFinite(savePct)) return 1.4;
+  const s=Math.max(0,Math.min(PIT_MAXSAVE,savePct));
+  return 0.4 + (s/PIT_MAXSAVE)*2.4;   // 0 % ≈0,4 s · 15 % ≈2,8 s
+}
+function liftCoastZones(p, savePct){
   if(!p||!p.speed||!p.brk||!p.grid) return [];
+  const coastSec=coastSecFor(savePct);
   const N=Math.min(p.speed.length,p.brk.length,p.grid.length);
   let bmax=0; for(let i=0;i<N;i++){ const v=p.brk[i]; if(isFinite(v)&&v>bmax)bmax=v; }
   if(bmax<=0) return [];
@@ -1238,10 +1293,11 @@ function liftCoastZones(p){
     for(let k=z.a;k<=z.b;k++){ const v=p.speed[k]; if(isFinite(v)&&v<vMin)vMin=v; }
     const drop=vEntry-vMin;
     if(!(drop>20 && vEntry>120)) return;
-    // Coast-Zone: ~80 m vor dem Bremspunkt (dort früher lüften)
-    let ls=z.a; const startDist=p.grid[z.a]-80;
+    // Coast-Zone dynamisch: höhere Eintrittsgeschwindigkeit + mehr nötige Ersparnis => früher lüften
+    const coastDist=Math.max(15,Math.min(220,(vEntry/3.6)*coastSec));
+    let ls=z.a; const startDist=p.grid[z.a]-coastDist;
     while(ls>0 && p.grid[ls]>startDist) ls--;
-    out.push({a:z.a,b:z.b,ls,vEntry,vMin,drop,dist:p.grid[z.a],score:vEntry*drop});
+    out.push({a:z.a,b:z.b,ls,vEntry,vMin,drop,dist:p.grid[z.a],liftDist:p.grid[ls],score:vEntry*drop});
   });
   out.sort((x,y)=>y.score-x.score);
   return out;
@@ -1249,22 +1305,50 @@ function liftCoastZones(p){
 function renderPitMap(){
   const cv=document.getElementById("cPitMap"); if(!cv)return;
   const p=STATE.refP, leg=document.getElementById("pitMapLegend"), list=document.getElementById("pitMapList");
+  cv._lcZones=[];
   if(!p||!p.lat||!p.lon){ drawTrackMap(cv,p,()=>"#46506a",{noGpsText:t("noGpsShort")}); if(leg)leg.innerHTML=""; if(list)list.innerHTML=`<div class="hint">${t("liftCoastNone")}</div>`; return; }
-  const zones=liftCoastZones(p).slice(0,5);
-  const N=p.speed.length, hl=new Int16Array(N).fill(-1), pois=[];
-  zones.forEach((z,r)=>{ for(let k=z.ls;k<=z.b && k<N;k++) hl[k]=r; pois.push({i:z.ls,label:"①②③④⑤".charAt(r)||String(r+1),color:r===0?"#ffd166":"#58d68d"}); });
-  const colorFn=i=>{ const r=hl[i]; return r<0?"#3a4252":(r===0?"#ffd166":"#58d68d"); };
+  const sp=STATE.lcSavePct;
+  const zones=liftCoastZones(p,sp).slice(0,5);
+  cv._lcZones=zones;
+  const basis = sp==null ? t("lcSaveBasisTele") : (sp<=0.3 ? t("lcSaveBasisNone") : t("lcSaveBasis",sp.toFixed(0)));
+  const N=p.speed.length, hl=new Int16Array(N).fill(-1), coast=new Uint8Array(N), pois=[];
+  zones.forEach((z,r)=>{
+    for(let k=z.ls;k<=z.b && k<N;k++){ hl[k]=r; if(k<z.a) coast[k]=1; }
+    pois.push({i:z.ls,label:"①②③④⑤".charAt(r)||String(r+1),color:r===0?"#ffd166":"#58d68d"});
+    pois.push({i:z.a,color:"#f85149",ring:true});   // normaler Bremspunkt
+  });
+  const colorFn=i=>{ const r=hl[i]; if(r<0)return "#3a4252"; if(coast[i])return "#22d3ee"; return r===0?"#ffd166":"#58d68d"; };
   drawTrackMap(cv,p,colorFn,{pois,lw:5,dot:8,pad:30});
-  if(leg) leg.innerHTML=`<span><i style="background:#ffd166"></i> ${t("lcZone",1)}</span><span><i style="background:#58d68d"></i> ${t("lcZone","2–5")}</span><span><i style="background:#3a4252"></i> —</span>`;
+  if(leg) leg.innerHTML=`<span><i style="background:#22d3ee"></i> ${t("lcCoast")}</span><span><i style="background:#ffd166"></i> ${t("lcZone",1)}</span><span><i style="background:#58d68d"></i> ${t("lcZone","2–5")}</span><span><i style="background:#f85149;border-radius:50%"></i> ${t("lcBrakePt")}</span>`;
   if(list){
     if(!zones.length){ list.innerHTML=`<div class="hint">${t("liftCoastNone")}</div>`; return; }
-    list.innerHTML=`<div class="scrollx"><table><thead><tr><th>#</th><th>${t("lcAt")} (m)</th><th>${t("lcEntry")}</th><th>${t("lcDrop")}</th></tr></thead><tbody>`+
-      zones.map((z,r)=>`<tr><td><b style="color:${r===0?'#ffd166':'#58d68d'}">${"①②③④⑤".charAt(r)||(r+1)}</b></td><td>${z.dist.toFixed(0)} m</td><td>${z.vEntry.toFixed(0)} km/h</td><td>−${z.drop.toFixed(0)} km/h</td></tr>`).join("")+
+    list.innerHTML=`<div class="hint" style="margin-bottom:6px">${basis}</div><div class="scrollx"><table id="lcTable"><thead><tr><th>#</th><th>${t("lcLiftPt")} (m)</th><th>${t("lcBrakePt")} (m)</th><th>${t("lcCoastGap")}</th><th>${t("lcEntry")}</th><th>${t("lcDrop")}</th></tr></thead><tbody>`+
+      zones.map((z,r)=>`<tr data-r="${r}"><td><b style="color:${r===0?'#ffd166':'#58d68d'}">${"①②③④⑤".charAt(r)||(r+1)}</b></td><td style="color:#22d3ee">${z.liftDist.toFixed(0)}</td><td style="color:#f85149">${z.dist.toFixed(0)}</td><td>${(z.dist-z.liftDist).toFixed(0)} m</td><td>${z.vEntry.toFixed(0)} km/h</td><td>−${z.drop.toFixed(0)} km/h</td></tr>`).join("")+
       `</tbody></table></div>`;
   }
 }
+function attachPitMapHover(){
+  const cv=document.getElementById("cPitMap"), tt=document.getElementById("ttPitMap"); if(!cv||cv._lcHoverInit)return; cv._lcHoverInit=true;
+  const clear=()=>{ if(tt)tt.style.display="none"; const tb=document.getElementById("pitMapList"); if(tb)tb.querySelectorAll("tr.lc-hi").forEach(r=>r.classList.remove("lc-hi")); };
+  cv.addEventListener("mousemove",e=>{ const tr=cv._track, zs=cv._lcZones; if(!tr||!zs||!zs.length||cv._dragging){clear();return;}
+    const r=cv.getBoundingClientRect(), mx=e.clientX-r.left, my=e.clientY-r.top;
+    let best=-1,bd=1e9;
+    zs.forEach((z,idx)=>{ [z.ls,z.a,(z.ls+z.b)>>1].forEach(i=>{ const dx=tr.PX(i)-mx, dy=tr.PY(i)-my, d=dx*dx+dy*dy; if(d<bd){bd=d;best=idx;} }); });
+    if(best<0||bd>2500){ clear(); return; }   // ~50px Radius
+    const z=zs[best], sym="①②③④⑤".charAt(best)||String(best+1);
+    const tb=document.getElementById("pitMapList");
+    if(tb){ tb.querySelectorAll("tr.lc-hi").forEach(x=>x.classList.remove("lc-hi")); const row=tb.querySelector(`tr[data-r="${best}"]`); if(row){ row.classList.add("lc-hi"); row.scrollIntoView({block:"nearest"}); } }
+    if(tt){ tt.innerHTML=`<div class="row" style="color:#8b97a7"><span>${t("lcZone",sym)}</span><b>${z.vEntry.toFixed(0)} km/h</b></div>`+
+        `<div class="row"><span style="color:#22d3ee">${t("lcLiftPt")}</span><b>${z.liftDist.toFixed(0)} m</b></div>`+
+        `<div class="row"><span style="color:#f85149">${t("lcBrakePt")}</span><b>${z.dist.toFixed(0)} m</b></div>`+
+        `<div class="row"><span>${t("lcCoastGap")}</span><b>${(z.dist-z.liftDist).toFixed(0)} m</b></div>`+
+        `<div class="row"><span>${t("lcDrop")}</span><b>−${z.drop.toFixed(0)} km/h</b></div>`;
+      tt.style.display="block"; let x=mx+14,y=my+12; if(x>r.width-170)x-=185; tt.style.left=x+"px"; tt.style.top=y+"px"; }
+  });
+  cv.addEventListener("mouseleave",clear);
+}
 function renderPit(){
-  const m=STATE.model, head=document.getElementById("piHead"); renderPitMap(); if(!m||!head)return;
+  const m=STATE.model, head=document.getElementById("piHead"); if(!m||!head){ renderPitMap(); return; }
   const raceMin=+document.getElementById("piRace").value;
   const tyres=Math.max(1,+document.getElementById("piTyres").value||1);
   const drivers=Math.max(1,+document.getElementById("piDrivers").value||1);
@@ -1276,7 +1360,7 @@ function renderPit(){
   const wearPerLap=parseFloat(document.getElementById("piWear").value)||null;
   const tyreLapsMax = wearPerLap? Math.max(1,Math.floor(100/wearPerLap)) : Infinity;   // Runden bis Reifen runter
   const tb=document.querySelector("#piTable tbody"), plan=document.getElementById("piDriverPlan");
-  if(!avgLap||avgLap<10||!raceMin){ head.innerHTML=`<div class="hint">${t("pitFill")}</div>`; tb.innerHTML=""; plan.innerHTML=""; return; }
+  if(!avgLap||avgLap<10||!raceMin){ head.innerHTML=`<div class="hint">${t("pitFill")}</div>`; tb.innerHTML=""; plan.innerHTML=""; STATE.lcSavePct=null; renderPitMap(); return; }
   const raceSec=raceMin*60, totalLaps=Math.ceil(raceSec/avgLap), veTank=100;
   const lapsPush = vePerLap? Math.max(1,Math.floor(veTank/vePerLap)) : totalLaps;
   const Senergy = Math.max(1, Math.ceil(totalLaps/lapsPush));
@@ -1295,20 +1379,26 @@ function renderPit(){
     rows.push({S,stops,lapsPerStint,stintMin:lapsPerStint*avgLap/60,veTarget,savePct,fuelStint,totalTime,feasible,tyreOK});
   }
   let best=null; rows.forEach(r=>{ if(r.feasible&&(!best||r.totalTime<best.totalTime))best=r; });
-  tb.innerHTML=rows.map(r=>`<tr class="${r===best?'fastest':''}${!r.feasible?' invalid':''}"><td>${r.stops}</td><td>${r.S}</td><td>${r.lapsPerStint}</td><td>${r.stintMin.toFixed(0)}</td><td>${r.veTarget!=null?r.veTarget.toFixed(2):'—'}</td><td>${r.savePct>0.3?'+'+r.savePct.toFixed(0)+'%':(r.savePct<-0.3?r.savePct.toFixed(0)+'%':'0')}</td><td>${r.fuelStint!=null?r.fuelStint.toFixed(1):'—'}</td><td>${fmtClock(r.totalTime)}</td><td>${r.feasible?'✓':'⚠'}</td></tr>`).join("");
-  if(!best){ head.innerHTML=`<div class="hint">${t("pitNoStrat")}</div>`; plan.innerHTML=""; return; }
-  const reused=Math.max(0,best.S-tyres);
-  const tyreTxt=t("tyreFresh",Math.min(best.S,tyres))+(reused>0?t("tyreReused",reused,tyres):'');
-  head.innerHTML=`<div style="font-size:16px;margin-bottom:8px"><b>${t("pitStops",best.stops)}</b> · ${t("pitStints",best.S,best.lapsPerStint,best.stintMin.toFixed(0))}</div>
+  const sel=(STATE.selStratS!=null?rows.find(r=>r.S===STATE.selStratS):null)||best;
+  STATE.lcSavePct = sel? sel.savePct : null;
+  renderPitMap();
+  tb.innerHTML=rows.map(r=>`<tr data-s="${r.S}" class="${r===best?'fastest':''}${r===sel?' selstrat':''}${!r.feasible?' invalid':''}"><td>${r.stops}</td><td>${r.S}</td><td>${r.lapsPerStint}</td><td>${r.stintMin.toFixed(0)}</td><td>${r.veTarget!=null?r.veTarget.toFixed(2):'—'}</td><td>${r.savePct>0.3?'+'+r.savePct.toFixed(0)+'%':(r.savePct<-0.3?r.savePct.toFixed(0)+'%':'0')}</td><td>${r.fuelStint!=null?r.fuelStint.toFixed(1):'—'}</td><td>${fmtClock(r.totalTime)}</td><td>${r.feasible?'✓':'⚠'}</td></tr>`).join("");
+  tb.querySelectorAll("tr[data-s]").forEach(tr=>tr.onclick=()=>{ STATE.selStratS=+tr.dataset.s; renderPit(); });
+  if(!sel){ head.innerHTML=`<div class="hint">${t("pitNoStrat")}</div>`; plan.innerHTML=""; return; }
+  const reused=Math.max(0,sel.S-tyres);
+  const tyreTxt=t("tyreFresh",Math.min(sel.S,tyres))+(reused>0?t("tyreReused",reused,tyres):'');
+  const badge = sel===best?`<span class="pill best">${t("fastestBadge")}</span>`:`<span class="pill cmp">${t("selectedBadge")}</span>`;
+  const slowerNote = (sel!==best&&best)?`<br><span class="up">${t("stratSlower",(sel.totalTime-best.totalTime).toFixed(0))}</span>`:'';
+  head.innerHTML=`<div style="font-size:16px;margin-bottom:8px"><b>${t("pitStops",sel.stops)}</b> · ${t("pitStints",sel.S,sel.lapsPerStint,sel.stintMin.toFixed(0))} ${badge}</div>
     <div class="grid2">
-      ${pitKpi(t("veRunde"), best.veTarget!=null?best.veTarget.toFixed(2)+" %":"—", best.savePct>0.5?t("veSave",best.savePct.toFixed(0)):(best.savePct<-0.5?t("veEnough"):t("veExact")), best.savePct>0.5?"up":"down")}
-      ${pitKpi(t("fuelStint"), best.fuelStint!=null?best.fuelStint.toFixed(1)+" L":"—",t("fuelTotal",(fuelPerLap?(fuelPerLap*totalLaps).toFixed(0)+" L":"—")))}
+      ${pitKpi(t("veRunde"), sel.veTarget!=null?sel.veTarget.toFixed(2)+" %":"—", sel.savePct>0.5?t("veSave",sel.savePct.toFixed(0)):(sel.savePct<-0.5?t("veEnough"):t("veExact")), sel.savePct>0.5?"up":"down")}
+      ${pitKpi(t("fuelStint"), sel.fuelStint!=null?sel.fuelStint.toFixed(1)+" L":"—",t("fuelTotal",(fuelPerLap?(fuelPerLap*totalLaps).toFixed(0)+" L":"—")))}
       ${pitKpi(t("raceDist"), t("lapsN",totalLaps),t("driveTime",fmtClock(totalLaps*avgLap)))}
-      ${pitKpi(t("estTotal"), fmtClock(best.totalTime), t("stopsXs",best.stops,pitLoss))}
+      ${pitKpi(t("estTotal"), fmtClock(sel.totalTime), t("stopsXs",sel.stops,pitLoss))}
     </div>
-    <div class="hint" style="margin-top:8px">${t("tyresLbl")} ${tyreTxt}${isFinite(tyreLapsMax)?t("tyreLast",tyreLapsMax,wearPerLap.toFixed(2)):''}.<br>${t("pitExplain",PIT_MAXSAVE,pen)}</div>`;
-  const D=drivers,S=best.S, baseS=Math.floor(S/D), extra=S%D; let html='';
-  for(let d=0;d<D;d++){ const st=baseS+(d<extra?1:0); html+=`<div class="stat"><div class="l">${t("driverK",d+1)}</div><div class="v">${t("stintsN",st)}</div><div class="d muted">${t("driverInfo",(st*best.stintMin).toFixed(0),st*best.lapsPerStint)}</div></div>`; }
+    <div class="hint" style="margin-top:8px">${t("tyresLbl")} ${tyreTxt}${isFinite(tyreLapsMax)?t("tyreLast",tyreLapsMax,wearPerLap.toFixed(2)):''}.${slowerNote}<br>${t("pitExplain",PIT_MAXSAVE,pen)}</div>`;
+  const D=drivers,S=sel.S, baseS=Math.floor(S/D), extra=S%D; let html='';
+  for(let d=0;d<D;d++){ const st=baseS+(d<extra?1:0); html+=`<div class="stat"><div class="l">${t("driverK",d+1)}</div><div class="v">${t("stintsN",st)}</div><div class="d muted">${t("driverInfo",(st*sel.stintMin).toFixed(0),st*sel.lapsPerStint)}</div></div>`; }
   plan.innerHTML='<div class="grid2">'+html+'</div>'+(S<D?`<div class="hint" style="margin-top:8px">${t("moreDrivers",D,S)}</div>`:'');
 }
 // Eingaben verdrahten
@@ -1460,7 +1550,7 @@ document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>switchTab(t.dataset.t
 addEventListener("resize",()=>{redrawAll(); if(STATE.refP){renderAllMaps(); renderPitMap();}});
 
 /* ---------- Versionscheck (GitHub Releases) ---------- */
-const APP_VERSION="1.7.0";
+const APP_VERSION="1.8.0";
 let versionChecked=false;
 function cmpVer(a,b){ const pa=String(a).split("."),pb=String(b).split("."); for(let i=0;i<3;i++){ const x=parseInt(pa[i]||0,10),y=parseInt(pb[i]||0,10); if(x>y)return 1; if(x<y)return -1; } return 0; }
 async function checkVersion(){ if(versionChecked)return; versionChecked=true;
@@ -1480,6 +1570,7 @@ attachMapHover("cTyreMap","ttTyreMap");
 attachMapHover("cMini","ttMini");
 ["cBigMap","cCompMap","cTyreMap","cMini"].forEach(id=>enableMapZoom(id));
 enableMapZoom("cPitMap", renderPitMap);
+attachPitMapHover();
 function updMapMode(){ document.getElementById("mapModeDelta").classList.toggle("active",mapMode==="delta"); document.getElementById("mapModeSpeed").classList.toggle("active",mapMode==="speed"); renderAllMaps(); }
 document.getElementById("mapModeDelta").onclick=()=>{ mapMode="delta"; updMapMode(); };
 document.getElementById("mapModeSpeed").onclick=()=>{ mapMode="speed"; updMapMode(); };

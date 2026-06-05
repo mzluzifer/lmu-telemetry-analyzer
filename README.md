@@ -46,7 +46,7 @@ In `…\Le Mans Ultimate\UserData\player\Settings.JSON`:
 
 ## Starten
 
-**Am einfachsten – ohne Konsolenfenster:** **`LMU-Telemetrie.exe`** doppelklicken. Die App startet
+**Am einfachsten – ohne Konsolenfenster:** **`LMU-Telemetry-Analyzer-Vx.x.x.exe`** doppelklicken. Die App startet
 komplett im Hintergrund (**kein schwarzes Kommandozeilenfenster**) und öffnet den Browser automatisch.
 Beenden über den **⏻-Button** oben rechts in der App. (DuckDB-CLI wird beim ersten Start geladen, falls
 nicht daneben vorhanden. Meldungen schreibt die App in `lmu-telemetrie.log` neben der EXE.)
